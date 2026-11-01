@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: makers-server
+  profiles:
+    active: local
