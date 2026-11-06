@@ -1,4 +1,5 @@
 package com.ganzithon.makers.test;
 
-public record TestStatus() {
+public enum TestStatus {
+  OPEN, CLOSED
 }
