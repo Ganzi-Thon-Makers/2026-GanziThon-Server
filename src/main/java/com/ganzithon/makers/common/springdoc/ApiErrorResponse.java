@@ -1,4 +1,4 @@
-package com.ganzithon.springdoc;
+package com.ganzithon.makers.common.springdoc;
 
 import com.ganzithon.makers.exception.ErrorCode;
 
