@@ -26,7 +26,7 @@ public class SuccessResponse<T> {
   }
 
   public static <T> SuccessResponse<T> of(T data) {
-    return of(data, "");
+    return of(data, null);
   }
 
   public static SuccessResponse<Void> of(String message) {
