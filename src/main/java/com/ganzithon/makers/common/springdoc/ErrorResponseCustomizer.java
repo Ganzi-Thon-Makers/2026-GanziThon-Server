@@ -13,8 +13,11 @@ import org.springdoc.core.customizers.OperationCustomizer;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ClassUtils;
 import org.springframework.web.method.HandlerMethod;
 
+import java.lang.reflect.Method;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -29,8 +32,15 @@ public class ErrorResponseCustomizer implements OperationCustomizer {
 
   @Override
   public Operation customize(Operation operation, HandlerMethod handlerMethod) {
-    Set<ApiErrorResponse> annotations = AnnotatedElementUtils
-        .findMergedRepeatableAnnotations(handlerMethod.getMethod(), ApiErrorResponse.class);
+    Method method = handlerMethod.getMethod();
+    Set<ApiErrorResponse> annotations = new LinkedHashSet<>(
+        AnnotatedElementUtils.findMergedRepeatableAnnotations(method, ApiErrorResponse.class));
+
+    Method interfaceMethod = ClassUtils.getInterfaceMethodIfPossible(method);
+    if (interfaceMethod != method) {
+      annotations.addAll(AnnotatedElementUtils
+          .findMergedRepeatableAnnotations(interfaceMethod, ApiErrorResponse.class));
+    }
     if (annotations.isEmpty()) {
       return operation;
     }
