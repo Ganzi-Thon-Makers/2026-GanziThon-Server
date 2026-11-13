@@ -1,5 +1,8 @@
 spring:
   application:
     name: makers-server
+  docker:
+    compose:
+      enabled: false
   profiles:
     active: local

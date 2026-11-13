@@ -26,8 +26,9 @@ dependencies {
 	// API 문서화
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.2.0'
 
-	// 데이터베이스 드라이버
+	// 데이터베이스
 	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
+	developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
 
 	// Lombok
 	compileOnly 'org.projectlombok:lombok'

@@ -1,0 +1,23 @@
+name: makers-local
+
+services:
+  mariadb:
+    image: mariadb:11.4
+    environment:
+      MARIADB_ROOT_PASSWORD: local-root-password
+      MARIADB_DATABASE: makers_server
+      MARIADB_USER: makers
+      MARIADB_PASSWORD: 12345
+    ports:
+      - "127.0.0.1:3307:3306"
+    volumes:
+      - mariadb-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+volumes:
+  mariadb-data:
