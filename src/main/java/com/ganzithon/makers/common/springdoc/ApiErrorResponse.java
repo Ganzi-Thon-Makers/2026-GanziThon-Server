@@ -1,6 +1,6 @@
 package com.ganzithon.makers.common.springdoc;
 
-import com.ganzithon.makers.exception.ErrorCode;
+import com.ganzithon.makers.common.exception.ErrorCode;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Repeatable;
