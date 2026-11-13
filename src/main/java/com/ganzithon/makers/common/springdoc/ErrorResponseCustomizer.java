@@ -1,7 +1,7 @@
 package com.ganzithon.makers.common.springdoc;
 
 import com.ganzithon.makers.common.dto.ErrorResponse;
-import com.ganzithon.makers.exception.ErrorCode;
+import com.ganzithon.makers.common.exception.ErrorCode;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.media.Content;

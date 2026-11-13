@@ -1,4 +1,4 @@
-package com.ganzithon.makers.exception;
+package com.ganzithon.makers.common.exception;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
