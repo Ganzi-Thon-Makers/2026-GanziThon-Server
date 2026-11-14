@@ -1,4 +1,4 @@
-package com.ganzithon.makers.service.domain.user.domain;
+package com.ganzithon.makers.platform.domain.user.domain;
 
 public enum Role {
     PARTICIPANT,
