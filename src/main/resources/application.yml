@@ -7,6 +7,11 @@ spring:
   profiles:
     active: local
 
+springdoc:
+  swagger-ui:
+    urls-primary-name: service
+    display-request-duration: true
+
 ncp:
   storage:
     endpoint: https://kr.object.ncloudstorage.com

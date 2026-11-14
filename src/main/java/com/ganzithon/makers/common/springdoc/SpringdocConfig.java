@@ -47,10 +47,20 @@ public class SpringdocConfig {
   }
 
   @Bean
-  public GroupedOpenApi makersApi() {
+  public GroupedOpenApi serviceApi() {
     return GroupedOpenApi.builder()
-        .group("Makers API")
-        .pathsToMatch("/**")
+        .group("service")
+        .displayName("Service API")
+        .packagesToScan("com.ganzithon.makers.service")
+        .build();
+  }
+
+  @Bean
+  public GroupedOpenApi backofficeApi() {
+    return GroupedOpenApi.builder()
+        .group("backoffice")
+        .displayName("BackOffice API")
+        .packagesToScan("com.ganzithon.makers.backoffice")
         .build();
   }
 }
