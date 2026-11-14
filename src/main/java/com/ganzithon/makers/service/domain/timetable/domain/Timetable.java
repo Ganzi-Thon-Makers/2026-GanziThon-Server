@@ -1,4 +1,4 @@
-package com.ganzithon.makers.platform.domain.timetable.domain;
+package com.ganzithon.makers.service.domain.timetable.domain;
 
 import com.ganzithon.makers.common.persistence.BaseEntity;
 import jakarta.persistence.Column;

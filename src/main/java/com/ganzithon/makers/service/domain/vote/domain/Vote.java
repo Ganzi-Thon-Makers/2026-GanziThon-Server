@@ -1,4 +1,4 @@
-package com.ganzithon.makers.platform.domain.vote.domain;
+package com.ganzithon.makers.service.domain.vote.domain;
 
 import com.ganzithon.makers.common.persistence.BaseEntity;
 import jakarta.persistence.Column;

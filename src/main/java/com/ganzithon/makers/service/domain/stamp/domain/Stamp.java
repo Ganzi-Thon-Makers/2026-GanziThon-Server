@@ -1,4 +1,4 @@
-package com.ganzithon.makers.platform.domain.stamp.domain;
+package com.ganzithon.makers.service.domain.stamp.domain;
 
 import com.ganzithon.makers.common.persistence.BaseEntity;
 import jakarta.persistence.Column;

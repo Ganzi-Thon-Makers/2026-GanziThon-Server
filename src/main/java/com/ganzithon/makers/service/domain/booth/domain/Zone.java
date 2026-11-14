@@ -1,4 +1,4 @@
-package com.ganzithon.makers.platform.domain.booth.domain;
+package com.ganzithon.makers.service.domain.booth.domain;
 
 public enum Zone {
     ZONE1,
