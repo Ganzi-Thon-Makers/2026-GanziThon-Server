@@ -58,3 +58,4 @@ CODEX.md
 .codex/
 
 src/main/resources/application-local.yml
+.env

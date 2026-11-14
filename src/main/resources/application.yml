@@ -6,3 +6,8 @@ spring:
       enabled: false
   profiles:
     active: local
+
+springdoc:
+  swagger-ui:
+    urls-primary-name: service
+    display-request-duration: true
