@@ -28,7 +28,7 @@ public class User extends BaseEntity {
     @Column(name = "name", length = 50, nullable = false)
     private String name;
 
-    @Column(name = "phoneNumber", length = 20, nullable = false)
+    @Column(name = "phone_number", length = 20, nullable = false)
     private String phoneNumber;
 
     @Column(name = "school", length = 50, nullable = false)
@@ -38,7 +38,7 @@ public class User extends BaseEntity {
     @Column(name = "role", length = 20, nullable = false)
     private Role role;
 
-    @Column(name = "teamNumber", nullable = false)
+    @Column(name = "team_number")
     private Integer teamNumber;
 
     @Column(name = "is_lucky_draw_entered", nullable = false)
