@@ -1,0 +1,27 @@
+package com.ganzithon.makers.service.domain.project.application;
+
+import com.ganzithon.makers.common.exception.BusinessException;
+import com.ganzithon.makers.common.exception.ErrorCode;
+import com.ganzithon.makers.service.domain.project.domain.Project;
+import com.ganzithon.makers.service.domain.project.infrastructure.ProjectRepository;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+public class ProjectService {
+
+  private final ProjectRepository projectRepository;
+
+  public Project findById(Long projectId) {
+    return projectRepository.findById(projectId)
+        .orElseThrow(() -> new BusinessException(ErrorCode.PROJECT_NOT_FOUND));
+  }
+
+  public List<Project> findAllByIds(List<Long> projectIds) {
+    return projectRepository.findAllById(projectIds);
+  }
+}
