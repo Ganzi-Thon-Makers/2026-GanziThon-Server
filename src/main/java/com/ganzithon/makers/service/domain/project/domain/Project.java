@@ -3,6 +3,8 @@ package com.ganzithon.makers.service.domain.project.domain;
 import com.ganzithon.makers.common.persistence.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -37,6 +39,10 @@ public class Project extends BaseEntity {
     @Column(name = "tech_stack", length = 500, nullable = false)
     private String techStack;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "platform", length = 20, nullable = false)
+    private Platform platform;
+
     private Project(
         String title,
         String teamName,
@@ -44,7 +50,8 @@ public class Project extends BaseEntity {
         String description,
         String serviceUrl,
         String thumbnailUrl,
-        String techStack
+        String techStack,
+        Platform platform
     ) {
         this.title = title;
         this.teamName = teamName;
@@ -53,6 +60,7 @@ public class Project extends BaseEntity {
         this.serviceUrl = serviceUrl;
         this.thumbnailUrl = thumbnailUrl;
         this.techStack = techStack;
+        this.platform = platform;
     }
 
     public static Project create(
@@ -62,7 +70,8 @@ public class Project extends BaseEntity {
         String description,
         String serviceUrl,
         String thumbnailUrl,
-        String techStack
+        String techStack,
+        Platform platform
     ) {
         return new Project(
             title,
@@ -71,7 +80,8 @@ public class Project extends BaseEntity {
             description,
             serviceUrl,
             thumbnailUrl,
-            techStack
+            techStack,
+            platform
         );
     }
 }
