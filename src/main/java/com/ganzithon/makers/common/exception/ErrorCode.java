@@ -36,6 +36,8 @@ public enum ErrorCode {
   INVALID_TIMETABLE_TIME_RANGE(HttpStatus.BAD_REQUEST, "종료시간은 시작시간보다 늦어야 합니다."),
   VOTE_TIMETABLE_ALREADY_EXISTS(HttpStatus.CONFLICT, "투표 일정은 하나만 등록할 수 있습니다."),
   VOTE_TIMETABLE_NOT_DELETABLE(HttpStatus.CONFLICT, "투표 일정은 삭제할 수 없습니다."),
+  VOTE_TIMETABLE_NOT_FOUND(HttpStatus.NOT_FOUND, "투표 일정이 등록되지 않았습니다."),
+  VOTE_IN_PROGRESS(HttpStatus.CONFLICT, "투표가 진행 중이라 시간을 수정할 수 없습니다. 일시중지 후 수정해 주세요."),
 
   INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류가 발생했습니다."),
   ;

@@ -2,6 +2,7 @@ package com.ganzithon.makers.backoffice.timetable.infrastructure;
 
 import com.ganzithon.makers.platform.domain.timetable.domain.Timetable;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface TimetableRepository extends JpaRepository<Timetable, Long> {
@@ -10,4 +11,6 @@ public interface TimetableRepository extends JpaRepository<Timetable, Long> {
   List<Timetable> findAllByOrderByStartTimeAscEndTimeAscIdAsc();
 
   boolean existsByVoteTrue();
+
+  Optional<Timetable> findByVoteTrue();
 }

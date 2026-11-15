@@ -70,7 +70,8 @@ public class BackofficeTimetableService {
         request.title(),
         request.description(),
         request.startTime(),
-        request.endTime()
+        request.endTime(),
+        LocalDateTime.now(clock)
     );
     return timetable;
   }
