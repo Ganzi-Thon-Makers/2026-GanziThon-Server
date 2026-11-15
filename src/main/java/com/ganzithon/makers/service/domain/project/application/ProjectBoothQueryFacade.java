@@ -28,7 +28,7 @@ public class ProjectBoothQueryFacade {
   private final UserService userService;
 
   public Map<Zone, List<ProjectSummaryResponse>> getProjectsGroupedByZone() {
-    List<Booth> booths = boothService.findAllOrderByZoneAndBoothNumber();
+    List<Booth> booths = boothService.findAllOrderByBoothNumber();
 
     List<Long> projectIds = booths.stream()
         .map(Booth::getProjectId)

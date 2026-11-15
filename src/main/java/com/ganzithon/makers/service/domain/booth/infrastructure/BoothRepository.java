@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface BoothRepository extends JpaRepository<Booth, Long> {
 
-  List<Booth> findAllByOrderByZoneAscBoothNumberAsc();
+  List<Booth> findAllByOrderByBoothNumberAsc();
 
   Optional<Booth> findByProjectId(Long projectId);
 }
