@@ -25,7 +25,7 @@ springdoc:
     enabled: true
   swagger-ui:
     enabled: true
-    urls-primary-name: Service API
+    urls-primary-name: Platform API
     display-request-duration: true
 
 management:

@@ -3,7 +3,7 @@ name: Deploy DEV
 on:
   push:
     branches:
-      - deploy/ncp-dev-infrastructure
+      - dev
   workflow_dispatch:
 
 permissions:

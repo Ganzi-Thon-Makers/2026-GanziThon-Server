@@ -3,15 +3,15 @@ package com.ganzithon.makers;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.ganzithon.makers.common.persistence.BaseEntity;
-import com.ganzithon.makers.service.domain.booth.domain.Booth;
-import com.ganzithon.makers.service.domain.booth.domain.Zone;
-import com.ganzithon.makers.service.domain.project.domain.Platform;
-import com.ganzithon.makers.service.domain.project.domain.Project;
-import com.ganzithon.makers.service.domain.stamp.domain.Stamp;
-import com.ganzithon.makers.service.domain.timetable.domain.Timetable;
-import com.ganzithon.makers.service.domain.user.domain.Role;
-import com.ganzithon.makers.service.domain.user.domain.User;
-import com.ganzithon.makers.service.domain.vote.domain.Vote;
+import com.ganzithon.makers.platform.domain.booth.domain.Booth;
+import com.ganzithon.makers.platform.domain.booth.domain.Zone;
+import com.ganzithon.makers.platform.domain.project.domain.Platform;
+import com.ganzithon.makers.platform.domain.project.domain.Project;
+import com.ganzithon.makers.platform.domain.stamp.domain.Stamp;
+import com.ganzithon.makers.platform.domain.timetable.domain.Timetable;
+import com.ganzithon.makers.platform.domain.user.domain.Role;
+import com.ganzithon.makers.platform.domain.user.domain.User;
+import com.ganzithon.makers.platform.domain.vote.domain.Vote;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.Test;
 
