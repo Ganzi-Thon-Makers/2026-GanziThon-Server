@@ -77,5 +77,4 @@ jobs:
           NCP_SECRET_KEY: ${{ secrets.NCP_SECRET_KEY }}
         run: |
           set -euo pipefail
-
           bash deploy/scripts/deploy-dev.sh

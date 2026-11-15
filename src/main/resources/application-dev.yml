@@ -44,7 +44,7 @@ ncp:
     bucket: ${NCP_BUCKET}
     access-key: ${NCP_ACCESS_KEY}
     secret-key: ${NCP_SECRET_KEY}
-    public-base-url: https://kr.object.ncloudstorage.com/${NCP_BUCKET}
+    public-base-url: ${ncp.storage.endpoint}/${ncp.storage.bucket}
 app:
   cors:
     allowed-origin-patterns: http://localhost:[*],http://127.0.0.1:[*],https://dev-api.ganzithon.com,https://ganzithon.com,https://admin.ganzithon.com
