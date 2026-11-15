@@ -12,21 +12,39 @@ spring:
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
+
+  servlet:
+    multipart:
+      # nginx client_max_body_size(20m)와 맞춤
+      max-file-size: 20MB
+      max-request-size: 20MB
 
 springdoc:
   api-docs:
     enabled: true
   swagger-ui:
     enabled: true
-    urls-primary-name: service
+    urls-primary-name: Service API
     display-request-duration: true
 
 management:
   endpoints:
     web:
       exposure:
-        include: health
+        include: health,info
   endpoint:
     health:
       show-details: never
+
+ncp:
+  storage:
+    endpoint: https://kr.object.ncloudstorage.com
+    region: kr-standard
+    bucket: ${NCP_BUCKET}
+    access-key: ${NCP_ACCESS_KEY}
+    secret-key: ${NCP_SECRET_KEY}
+    public-base-url: https://kr.object.ncloudstorage.com/${NCP_BUCKET}
+app:
+  cors:
+    allowed-origin-patterns: http://localhost:*,http://127.0.0.1:*

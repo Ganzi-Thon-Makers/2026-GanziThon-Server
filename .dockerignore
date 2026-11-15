@@ -4,6 +4,9 @@
 build
 .idea
 *.iml
+
 .env
-**/.env
-deploy
+.env.*
+env.properties
+
+README.md

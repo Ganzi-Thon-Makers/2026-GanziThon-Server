@@ -1,0 +1,43 @@
+name: Deploy DEV
+
+on:
+  push:
+    branches: [deploy/ncp-dev-infrastructure]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-dev
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to NCP DEV
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Run deploy script on DEV server
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          DEV_DB_URL: ${{ secrets.DEV_DB_URL }}
+          DEV_DB_USER: ${{ secrets.DEV_DB_USER }}
+          DEV_DB_PASSWORD: ${{ secrets.DEV_DB_PASSWORD }}
+          NCP_BUCKET: ${{ secrets.NCP_BUCKET }}
+          NCP_ACCESS_KEY: ${{ secrets.NCP_ACCESS_KEY }}
+          NCP_SECRET_KEY: ${{ secrets.NCP_SECRET_KEY }}
+          # 트리거된 브랜치를 그대로 배포 (브랜치 이름을 스크립트에 직접 끼워 넣지 않고 환경변수로 전달)
+          DEPLOY_BRANCH: ${{ github.ref_name }}
+        with:
+          host: ${{ secrets.DEV_SERVER_HOST }}
+          username: ${{ secrets.DEV_SERVER_USER }}
+          key: ${{ secrets.DEV_SERVER_SSH_KEY }}
+          envs: DEV_DB_URL,DEV_DB_USER,DEV_DB_PASSWORD,NCP_BUCKET,NCP_ACCESS_KEY,NCP_SECRET_KEY,DEPLOY_BRANCH
+          script_stop: true
+          command_timeout: 20m
+          script: |
+            cd ${{ secrets.DEV_SERVER_APP_DIR }}
+            git fetch origin "$DEPLOY_BRANCH"
+            git checkout --force --detach FETCH_HEAD
+            bash deploy/scripts/deploy-dev.sh

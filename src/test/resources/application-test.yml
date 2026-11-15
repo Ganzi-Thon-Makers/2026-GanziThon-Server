@@ -1,0 +1,24 @@
+spring:
+  docker:
+    compose:
+      enabled: false
+  datasource:
+    url: ${TEST_DB_URL}
+    username: ${TEST_DB_USER}
+    password: ${TEST_DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: create-drop
+
+# Context test creates S3Client but does not call external storage.
+# Storage integration tests should use a stub endpoint, never real account keys.
+ncp:
+  storage:
+    endpoint: http://127.0.0.1:9000
+    region: kr-standard
+    bucket: ci-test-bucket
+    access-key: ci-test-access-key
+    secret-key: ci-test-secret-key
+    public-base-url: http://127.0.0.1:9000/ci-test-bucket
