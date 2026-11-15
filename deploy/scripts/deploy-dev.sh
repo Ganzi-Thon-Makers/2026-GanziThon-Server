@@ -90,7 +90,7 @@ done
 echo "[5/5] Verify HTTPS endpoints"
 ENDPOINTS=(
   /actuator/health
-  /v3/api-docs/service
+  /v3/api-docs/platform
   /v3/api-docs/backoffice
   /swagger-ui/index.html
 )
