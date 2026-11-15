@@ -34,10 +34,10 @@ jobs:
           username: ${{ secrets.DEV_SERVER_USER }}
           key: ${{ secrets.DEV_SERVER_SSH_KEY }}
           envs: DEV_DB_URL,DEV_DB_USER,DEV_DB_PASSWORD,NCP_BUCKET,NCP_ACCESS_KEY,NCP_SECRET_KEY,DEPLOY_BRANCH
-          script_stop: true
           command_timeout: 20m
           script: |
-            cd ${{ secrets.DEV_SERVER_APP_DIR }}
+            set -eu
+            cd "$HOME/2026-GanziThon-Server"
             git fetch origin "$DEPLOY_BRANCH"
             git checkout --force --detach FETCH_HEAD
             bash deploy/scripts/deploy-dev.sh
