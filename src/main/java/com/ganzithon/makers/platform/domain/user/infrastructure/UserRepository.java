@@ -1,0 +1,10 @@
+package com.ganzithon.makers.platform.domain.user.infrastructure;
+
+import com.ganzithon.makers.platform.domain.user.domain.User;
+import java.util.List;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface UserRepository extends JpaRepository<User, Long> {
+
+  List<User> findAllByProjectId(Long projectId);
+}

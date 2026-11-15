@@ -23,6 +23,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	// API 문서화
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.2.0'
 
@@ -30,7 +31,7 @@ dependencies {
 	implementation 'software.amazon.awssdk:s3:2.25.0'
 
 	// 데이터베이스
-	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
+	runtimeOnly 'com.mysql:mysql-connector-j'
 	developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
 
 	// Lombok
@@ -48,6 +49,10 @@ dependencies {
 
 	// JUnit 테스트 실행기
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('jar') {
+	enabled = false
 }
 
 tasks.named('test') {

@@ -25,32 +25,42 @@ public class SpringdocConfig {
   @Bean
   public OpenAPI openAPI() {
     Components components = new Components()
-        .addSecuritySchemes(SECURITY_SCHEME_NAME, new SecurityScheme()
-            .type(SecurityScheme.Type.HTTP)
-            .scheme("bearer")
-            .bearerFormat("JWT")
-            .in(SecurityScheme.In.HEADER)
-            .description("JWT 토큰을 입력하세요 (Bearer prefix 제외)"));
+            .addSecuritySchemes(SECURITY_SCHEME_NAME, new SecurityScheme()
+                    .type(SecurityScheme.Type.HTTP)
+                    .scheme("bearer")
+                    .bearerFormat("JWT")
+                    .in(SecurityScheme.In.HEADER)
+                    .description("JWT 토큰을 입력하세요 (Bearer prefix 제외)"));
 
     ModelConverters.getInstance()
-        .read(ErrorResponse.class)
-        .forEach(components::addSchemas);
+            .read(ErrorResponse.class)
+            .forEach(components::addSchemas);
 
     return new OpenAPI()
-        .info(new Info()
-            .title("Makers API Document")
-            .version("v0.0.1")
-            .description("Makers 서비스 API 명세서입니다."))
-        .components(components)
-        .addServersItem(new Server().url("/"))
-        .addSecurityItem(new SecurityRequirement().addList(SECURITY_SCHEME_NAME));
+            .info(new Info()
+                    .title("GanziThon API Document")
+                    .version("v0.0.1")
+                    .description("GanziThon Platform 및 BackOffice API 명세서입니다."))
+            .components(components)
+            .addServersItem(new Server().url("/"))
+            .addSecurityItem(new SecurityRequirement().addList(SECURITY_SCHEME_NAME));
   }
 
   @Bean
-  public GroupedOpenApi makersApi() {
+  public GroupedOpenApi platformApi() {
     return GroupedOpenApi.builder()
-        .group("Makers API")
-        .pathsToMatch("/**")
-        .build();
+            .group("platform")
+            .displayName("Platform API")
+            .packagesToScan("com.ganzithon.makers.platform")
+            .build();
+  }
+
+  @Bean
+  public GroupedOpenApi backofficeApi() {
+    return GroupedOpenApi.builder()
+            .group("backoffice")
+            .displayName("BackOffice API")
+            .packagesToScan("com.ganzithon.makers.backoffice")
+            .build();
   }
 }

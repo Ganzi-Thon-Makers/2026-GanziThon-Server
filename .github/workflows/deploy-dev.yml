@@ -1,0 +1,80 @@
+name: Deploy DEV
+
+on:
+  push:
+    branches:
+      - dev
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-dev
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to NCP DEV
+
+    runs-on:
+      - self-hosted
+      - linux
+      - x64
+      - ncp-dev
+
+    timeout-minutes: 30
+
+    steps:
+      # 1. 배포 대상 코드 체크아웃
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      # 2. Docker 실행 환경 확인
+      - name: Check Docker
+        run: |
+          docker version
+          docker compose version
+
+      # 3. GitHub Secrets 검증
+      - name: Validate deployment secrets
+        env:
+          DEV_DB_URL: ${{ secrets.DEV_DB_URL }}
+          DEV_DB_USER: ${{ secrets.DEV_DB_USER }}
+          DEV_DB_PASSWORD: ${{ secrets.DEV_DB_PASSWORD }}
+          NCP_BUCKET: ${{ secrets.NCP_BUCKET }}
+          NCP_ACCESS_KEY: ${{ secrets.NCP_ACCESS_KEY }}
+          NCP_SECRET_KEY: ${{ secrets.NCP_SECRET_KEY }}
+        run: |
+          set -euo pipefail
+
+          for var in \
+            DEV_DB_URL \
+            DEV_DB_USER \
+            DEV_DB_PASSWORD \
+            NCP_BUCKET \
+            NCP_ACCESS_KEY \
+            NCP_SECRET_KEY
+          do
+            if [ -z "${!var:-}" ]; then
+              echo "::error::Required secret ${var} is missing"
+              exit 1
+            fi
+          done
+
+          echo "All required deployment secrets are configured"
+
+      # 4. DEV 배포
+      - name: Deploy DEV
+        env:
+          DEV_DB_URL: ${{ secrets.DEV_DB_URL }}
+          DEV_DB_USER: ${{ secrets.DEV_DB_USER }}
+          DEV_DB_PASSWORD: ${{ secrets.DEV_DB_PASSWORD }}
+          NCP_BUCKET: ${{ secrets.NCP_BUCKET }}
+          NCP_ACCESS_KEY: ${{ secrets.NCP_ACCESS_KEY }}
+          NCP_SECRET_KEY: ${{ secrets.NCP_SECRET_KEY }}
+        run: |
+          set -euo pipefail
+          bash deploy/scripts/deploy-dev.sh
