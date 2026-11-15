@@ -8,6 +8,7 @@ import com.ganzithon.makers.common.exception.ErrorCode;
 import com.ganzithon.makers.service.domain.timetable.domain.Timetable;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,12 +49,18 @@ public class BackofficeTimetableService {
       throw new BusinessException(ErrorCode.VOTE_TIMETABLE_ALREADY_EXISTS);
     }
 
-    return timetableRepository.save(Timetable.createVote(
+    Timetable vote = Timetable.createVote(
         request.title(),
         request.description(),
         request.startTime(),
         request.endTime()
-    ));
+    );
+    try {
+      return timetableRepository.saveAndFlush(vote);
+    } catch (DataIntegrityViolationException e) {
+      // 동시 요청으로 위 존재 확인을 함께 통과한 경우, DB UNIQUE 제약(is_vote)이 막는다
+      throw new BusinessException(ErrorCode.VOTE_TIMETABLE_ALREADY_EXISTS);
+    }
   }
 
   @Transactional

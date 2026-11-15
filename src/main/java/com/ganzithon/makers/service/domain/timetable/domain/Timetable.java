@@ -19,8 +19,11 @@ import java.time.LocalDateTime;
 @Table(name = "timetable")
 public class Timetable extends BaseEntity {
 
-    @Column(name = "is_vote", nullable = false)
-    private boolean vote = false;
+    // 투표 일정이면 true, 일반 일정이면 NULL
+    // UNIQUE는 NULL끼리는 중복으로 보지 않으므로, DB에서 투표 일정이 1개로 제한된다
+    @Getter(AccessLevel.NONE)
+    @Column(name = "is_vote", unique = true)
+    private Boolean vote;
 
     @Column(name = "is_paused", nullable = false)
     private boolean paused = false;
@@ -46,7 +49,7 @@ public class Timetable extends BaseEntity {
         LocalDateTime endTime
     ) {
         validateTimeRange(startTime, endTime);
-        this.vote = vote;
+        this.vote = vote ? Boolean.TRUE : null;
         this.title = title;
         this.description = description;
         this.startTime = startTime;
@@ -85,6 +88,10 @@ public class Timetable extends BaseEntity {
         this.description = description;
         this.startTime = startTime;
         this.endTime = endTime;
+    }
+
+    public boolean isVote() {
+        return Boolean.TRUE.equals(vote);
     }
 
     // 투표 일시중지 (이미 중지 상태여도 그대로 둔다)
