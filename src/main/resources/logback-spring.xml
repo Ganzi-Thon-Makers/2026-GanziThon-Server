@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- Spring Boot 애플리케이션 이름 -->
+    <springProperty
+            scope="context"
+            name="APP_NAME"
+            source="spring.application.name"
+            defaultValue="ganzithon-server"
+    />
+
+    <!-- 공통 로그 패턴 -->
+    <property
+            name="CONSOLE_LOG_PATTERN"
+            value="%d{yyyy-MM-dd HH:mm:ss.SSS,Asia/Seoul} %highlight(%-5level) %magenta([${APP_NAME}]) %cyan([%thread]) %logger{40} - %msg%n%ex"
+    />
+
+    <!-- 콘솔 로그 -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- LOCAL -->
+    <springProfile name="local">
+
+        <logger name="com.ganzithon.makers" level="DEBUG"/>
+
+        <logger name="org.springframework.web" level="INFO"/>
+        <logger name="org.hibernate.SQL" level="DEBUG"/>
+        <logger name="org.hibernate.orm.jdbc.bind" level="OFF"/>
+
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+
+    </springProfile>
+
+    <!-- DEV: 개발 서버 모니터링 -->
+    <springProfile name="dev">
+
+        <!-- 프로젝트 전체 상세 로그 -->
+        <logger name="com.ganzithon.makers" level="DEBUG"/>
+
+        <!-- Spring MVC -->
+        <logger name="org.springframework.web" level="INFO"/>
+
+        <!-- Spring Security -->
+        <logger name="org.springframework.security" level="INFO"/>
+
+        <!-- Hibernate -->
+        <logger name="org.hibernate.SQL" level="WARN"/>
+        <logger name="org.hibernate.orm.jdbc.bind" level="OFF"/>
+
+        <!-- DB 커넥션 풀 -->
+        <logger name="com.zaxxer.hikari" level="INFO"/>
+
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+
+    </springProfile>
+
+    <!-- PROD: 운영 서버 모니터링 -->
+    <springProfile name="prod">
+
+        <!-- 비즈니스 이벤트 및 오류 -->
+        <logger name="com.ganzithon.makers" level="INFO"/>
+
+        <!-- Spring Framework -->
+        <logger name="org.springframework" level="WARN"/>
+
+        <!-- Hibernate -->
+        <logger name="org.hibernate" level="WARN"/>
+        <logger name="org.hibernate.orm.jdbc.bind" level="OFF"/>
+
+        <!-- DB 커넥션 풀 -->
+        <logger name="com.zaxxer.hikari" level="WARN"/>
+
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+
+    </springProfile>
+
+    <!-- TEST -->
+    <springProfile name="test">
+
+        <root level="WARN">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+
+    </springProfile>
+
+    <!-- 기본 프로필 -->
+    <springProfile name="!local &amp; !dev &amp; !prod &amp; !test">
+
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+
+    </springProfile>
+
+</configuration>
