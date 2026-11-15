@@ -3,10 +3,10 @@ spring:
     compose:
       enabled: false
   datasource:
-    url: ${TEST_DB_URL}
-    username: ${TEST_DB_USER}
-    password: ${TEST_DB_PASSWORD}
-    driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://127.0.0.1:3306/ganzithon_test
+      username: test_user
+      password: test_password
+      driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     open-in-view: false
     hibernate:
