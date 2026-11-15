@@ -41,6 +41,13 @@ public class User extends BaseEntity {
     @Column(name = "team_number")
     private Integer teamNumber;
 
+    @Column(name = "project_id")
+    private Long projectId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "part", length = 20)
+    private Part part;
+
     @Column(name = "is_lucky_draw_entered", nullable = false)
     private boolean luckyDrawEntered = false;
 
@@ -83,5 +90,10 @@ public class User extends BaseEntity {
             role,
             teamNumber
         );
+    }
+
+    public void assignToProject(Long projectId, Part part) {
+        this.projectId = projectId;
+        this.part = part;
     }
 }
