@@ -16,8 +16,8 @@ public class BoothService {
 
   private final BoothRepository boothRepository;
 
-  public List<Booth> findAllOrderByZoneAndBoothNumber() {
-    return boothRepository.findAllByOrderByZoneAscBoothNumberAsc();
+  public List<Booth> findAllOrderByBoothNumber() {
+    return boothRepository.findAllByOrderByBoothNumberAsc();
   }
 
   public Booth findByProjectId(Long projectId) {
