@@ -1,5 +1,6 @@
 package com.ganzithon.makers.service.domain.project.presentation.dto;
 
+import com.ganzithon.makers.service.domain.project.domain.Platform;
 import com.ganzithon.makers.service.domain.project.domain.Project;
 
 public record ProjectSummaryResponse(
@@ -7,7 +8,8 @@ public record ProjectSummaryResponse(
     String title,
     String teamName,
     String summary,
-    String thumbnailUrl
+    String thumbnailUrl,
+    Platform platform
 ) {
 
   public static ProjectSummaryResponse of(Project project) {
@@ -16,7 +18,8 @@ public record ProjectSummaryResponse(
         project.getTitle(),
         project.getTeamName(),
         project.getSummary(),
-        project.getThumbnailUrl()
+        project.getThumbnailUrl(),
+        project.getPlatform()
     );
   }
 }

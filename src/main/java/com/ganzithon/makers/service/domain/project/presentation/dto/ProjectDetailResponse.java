@@ -2,6 +2,7 @@ package com.ganzithon.makers.service.domain.project.presentation.dto;
 
 import com.ganzithon.makers.service.domain.booth.domain.Booth;
 import com.ganzithon.makers.service.domain.booth.domain.Zone;
+import com.ganzithon.makers.service.domain.project.domain.Platform;
 import com.ganzithon.makers.service.domain.project.domain.Project;
 import com.ganzithon.makers.service.domain.user.domain.Part;
 import java.util.List;
@@ -16,6 +17,7 @@ public record ProjectDetailResponse(
     String serviceUrl,
     String thumbnailUrl,
     String techStack,
+    Platform platform,
     Zone zone,
     Integer boothNumber,
     Map<Part, List<String>> members
@@ -31,6 +33,7 @@ public record ProjectDetailResponse(
         project.getServiceUrl(),
         project.getThumbnailUrl(),
         project.getTechStack(),
+        project.getPlatform(),
         booth.getZone(),
         booth.getBoothNumber(),
         members

@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.ganzithon.makers.common.persistence.BaseEntity;
 import com.ganzithon.makers.service.domain.booth.domain.Booth;
 import com.ganzithon.makers.service.domain.booth.domain.Zone;
+import com.ganzithon.makers.service.domain.project.domain.Platform;
 import com.ganzithon.makers.service.domain.project.domain.Project;
 import com.ganzithon.makers.service.domain.stamp.domain.Stamp;
 import com.ganzithon.makers.service.domain.timetable.domain.Timetable;
@@ -49,7 +50,8 @@ class EntityFactoryTests {
             "description",
             null,
             "thumbnail",
-            "Java"
+            "Java",
+            Platform.WEB
         );
 
         assertThat(project.getTitle()).isEqualTo("title");
@@ -59,6 +61,7 @@ class EntityFactoryTests {
         assertThat(project.getServiceUrl()).isNull();
         assertThat(project.getThumbnailUrl()).isEqualTo("thumbnail");
         assertThat(project.getTechStack()).isEqualTo("Java");
+        assertThat(project.getPlatform()).isEqualTo(Platform.WEB);
         assertUnsaved(project);
     }
 
