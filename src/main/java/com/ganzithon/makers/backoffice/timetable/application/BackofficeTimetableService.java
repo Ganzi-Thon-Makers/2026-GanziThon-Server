@@ -88,6 +88,15 @@ public class BackofficeTimetableService {
     return timetable;
   }
 
+  // 투표 시간 수정 (투표 관리에서 사용). 타임테이블 수정과 같은 검사(시간 순서, 진행 중 수정 불가, 겹침)를 거친다
+  @Transactional
+  public Timetable changeVoteTime(LocalDateTime startTime, LocalDateTime endTime) {
+    Timetable vote = getVoteTimetable();
+    vote.changeVoteTime(startTime, endTime, LocalDateTime.now(clock));
+    validateNotOverlapping(vote, vote.getId());
+    return vote;
+  }
+
   @Transactional
   public void delete(Long timetableId) {
     Timetable timetable = findById(timetableId);

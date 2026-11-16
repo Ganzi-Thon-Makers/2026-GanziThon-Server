@@ -25,8 +25,7 @@ public class BackofficeVoteService {
 
   @Transactional
   public VoteResponse updateTime(VoteTimeUpdateRequest request) {
-    Timetable vote = backofficeTimetableService.getVoteTimetable();
-    vote.changeVoteTime(request.startTime(), request.endTime(), now());
+    Timetable vote = backofficeTimetableService.changeVoteTime(request.startTime(), request.endTime());
     return toResponse(vote);
   }
 

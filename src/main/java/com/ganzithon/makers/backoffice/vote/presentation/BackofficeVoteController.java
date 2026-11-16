@@ -35,7 +35,8 @@ public class BackofficeVoteController {
 
   @Operation(
       summary = "투표 시간 수정",
-      description = "마감시간은 시작시간보다 늦어야 합니다. 진행 중에는 수정할 수 없으며, 일시중지 후 수정할 수 있습니다.")
+      description = "마감시간은 시작시간보다 늦어야 하며, 다른 일정과 시간이 겹칠 수 없습니다. "
+          + "진행 중에는 수정할 수 없으며, 일시중지 후 수정할 수 있습니다.")
   @PutMapping("/time")
   public ResponseEntity<SuccessResponse<VoteResponse>> updateTime(
       @Valid @RequestBody VoteTimeUpdateRequest request
