@@ -14,4 +14,6 @@ public interface VoteRepository extends JpaRepository<Vote, Long> {
       group by v.projectId
       """)
   List<ProjectVoteCount> countGroupByProjectId();
+
+  long countByProjectId(Long projectId);
 }

@@ -1,8 +1,11 @@
 package com.ganzithon.makers.backoffice.project.application;
 
+import com.ganzithon.makers.backoffice.project.presentation.dto.ProjectDetailResponse;
 import com.ganzithon.makers.backoffice.project.presentation.dto.ProjectListResponse;
 import com.ganzithon.makers.platform.domain.project.application.ProjectService;
 import com.ganzithon.makers.platform.domain.project.domain.Project;
+import com.ganzithon.makers.platform.domain.user.application.UserService;
+import com.ganzithon.makers.platform.domain.user.domain.User;
 import com.ganzithon.makers.platform.domain.vote.application.VoteService;
 import java.util.Comparator;
 import java.util.List;
@@ -11,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** 프로젝트 목록 조회/검색 */
+/** 프로젝트 목록 조회/검색, 상세 조회 */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -19,6 +22,7 @@ public class BackofficeProjectService {
 
   private final ProjectService projectService;
   private final VoteService voteService;
+  private final UserService userService;
 
   // keyword 가 비어 있으면 전체 조회, 있으면 프로젝트명 부분 일치 검색
   public List<ProjectListResponse> getProjects(String keyword) {
@@ -33,5 +37,19 @@ public class BackofficeProjectService {
         .sorted(Comparator.comparingLong(ProjectListResponse::voteCount).reversed()
             .thenComparing(ProjectListResponse::id))
         .toList();
+  }
+
+  public ProjectDetailResponse getProject(Long projectId) {
+    Project project = projectService.findById(projectId);
+    long voteCount = voteService.countByProjectId(projectId);
+
+    // 파트 순(PLAN → DESIGN → WEB → APP → SERVER), 같은 파트는 id 순. 파트 미지정은 맨 뒤
+    List<ProjectDetailResponse.Member> members = userService.findAllByProjectId(projectId).stream()
+        .sorted(Comparator.comparing(User::getPart, Comparator.nullsLast(Comparator.naturalOrder()))
+            .thenComparing(User::getId))
+        .map(ProjectDetailResponse.Member::of)
+        .toList();
+
+    return ProjectDetailResponse.of(project, voteCount, members);
   }
 }

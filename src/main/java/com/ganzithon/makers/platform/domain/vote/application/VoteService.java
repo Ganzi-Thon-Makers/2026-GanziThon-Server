@@ -20,4 +20,8 @@ public class VoteService {
     return voteRepository.countGroupByProjectId().stream()
         .collect(Collectors.toMap(ProjectVoteCount::getProjectId, ProjectVoteCount::getVoteCount));
   }
+
+  public long countByProjectId(Long projectId) {
+    return voteRepository.countByProjectId(projectId);
+  }
 }

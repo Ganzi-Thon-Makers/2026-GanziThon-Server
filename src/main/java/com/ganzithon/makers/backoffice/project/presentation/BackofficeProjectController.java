@@ -1,6 +1,7 @@
 package com.ganzithon.makers.backoffice.project.presentation;
 
 import com.ganzithon.makers.backoffice.project.application.BackofficeProjectService;
+import com.ganzithon.makers.backoffice.project.presentation.dto.ProjectDetailResponse;
 import com.ganzithon.makers.backoffice.project.presentation.dto.ProjectListResponse;
 import com.ganzithon.makers.common.dto.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,6 +11,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,5 +35,13 @@ public class BackofficeProjectController {
       @RequestParam(required = false) String keyword
   ) {
     return ResponseEntity.ok(SuccessResponse.of(backofficeProjectService.getProjects(keyword)));
+  }
+
+  @Operation(
+      summary = "프로젝트 상세 조회",
+      description = "팀원은 파트 순(PLAN → DESIGN → WEB → APP → SERVER)으로 정렬됩니다. 득표수는 조회만 가능합니다.")
+  @GetMapping("/{projectId}")
+  public ResponseEntity<SuccessResponse<ProjectDetailResponse>> getProject(@PathVariable Long projectId) {
+    return ResponseEntity.ok(SuccessResponse.of(backofficeProjectService.getProject(projectId)));
   }
 }
