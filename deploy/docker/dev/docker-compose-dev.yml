@@ -30,6 +30,8 @@ services:
       NCP_BUCKET: ${NCP_BUCKET:?NCP_BUCKET is required}
       NCP_ACCESS_KEY: ${NCP_ACCESS_KEY:?NCP_ACCESS_KEY is required}
       NCP_SECRET_KEY: ${NCP_SECRET_KEY:?NCP_SECRET_KEY is required}
+      # JWT
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
 
     # Docker 내부 네트워크
     networks:
