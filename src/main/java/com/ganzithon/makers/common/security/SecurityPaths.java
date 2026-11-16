@@ -22,7 +22,7 @@ public final class SecurityPaths {
 
     // 팀 계정 전용 (스탬프 발급용 QR 생성)
     public static final String[] TEAM_ONLY = {
-            "/api/v1/stamps/qr/**"
+        "/api/v1/qr-tokens", "/api/v1/qr-tokens/**"
     };
 
     // 로그인한 사용자만 접근 가능
