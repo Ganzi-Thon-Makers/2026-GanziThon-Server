@@ -25,6 +25,10 @@ public class ProjectService {
     return projectRepository.findAll();
   }
 
+  public List<Project> searchByTitle(String keyword) {
+    return projectRepository.findAllByTitleContainingIgnoreCase(keyword);
+  }
+
   public List<Project> findAllByIds(List<Long> projectIds) {
     return projectRepository.findAllById(projectIds);
   }
