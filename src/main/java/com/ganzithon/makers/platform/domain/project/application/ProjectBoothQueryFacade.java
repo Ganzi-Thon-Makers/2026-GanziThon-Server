@@ -9,11 +9,13 @@ import com.ganzithon.makers.platform.domain.project.presentation.dto.ProjectSumm
 import com.ganzithon.makers.platform.domain.user.application.UserService;
 import com.ganzithon.makers.platform.domain.user.domain.Part;
 import com.ganzithon.makers.platform.domain.user.domain.User;
+import com.ganzithon.makers.platform.domain.vote.application.VoteService;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -27,9 +29,14 @@ public class ProjectBoothQueryFacade {
   private final ProjectService projectService;
   private final BoothService boothService;
   private final UserService userService;
+  private final VoteService voteService;
 
-  public Map<Zone, List<ProjectSummaryResponse>> getProjectsGroupedByZone() {
+  public Map<Zone, List<ProjectSummaryResponse>> getProjectsGroupedByZone(Long userId) {
     List<Booth> booths = boothService.findAllOrderByBoothNumber();
+
+    Set<Long> votedProjectIds = userId != null
+        ? voteService.findVotedProjectIdsByUserId(userId)
+        : Set.of();
 
     List<Long> projectIds = booths.stream()
         .map(Booth::getProjectId)
@@ -48,7 +55,8 @@ public class ProjectBoothQueryFacade {
       if (project == null) {
         continue;
       }
-      result.get(booth.getZone()).add(ProjectSummaryResponse.of(project));
+      result.get(booth.getZone())
+          .add(ProjectSummaryResponse.of(project, votedProjectIds.contains(project.getId())));
     }
 
     return result;

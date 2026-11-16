@@ -1,8 +1,10 @@
 package com.ganzithon.makers.platform.domain.vote.application;
 
 import com.ganzithon.makers.platform.domain.vote.infrastructure.ProjectVoteCount;
+import com.ganzithon.makers.platform.domain.vote.domain.Vote;
 import com.ganzithon.makers.platform.domain.vote.infrastructure.VoteRepository;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,5 +25,11 @@ public class VoteService {
 
   public long countByProjectId(Long projectId) {
     return voteRepository.countByProjectId(projectId);
+  }
+
+  public Set<Long> findVotedProjectIdsByUserId(Long userId) {
+    return voteRepository.findAllByUserId(userId).stream()
+        .map(Vote::getProjectId)
+        .collect(Collectors.toSet());
   }
 }
