@@ -32,7 +32,7 @@ public class BackofficeTimetableController {
 
   @Operation(
       summary = "일정 등록",
-      description = "종료시간은 시작시간보다 늦어야 합니다. 다른 일정과 시간이 겹쳐도 됩니다. "
+      description = "종료시간은 시작시간보다 늦어야 합니다. 다른 일정과 시간이 겹칠 수 없습니다. (끝과 시작이 맞닿는 것은 가능) "
           + "투표 일정(isVote: true)은 하나만 등록할 수 있습니다.")
   @PostMapping
   public ResponseEntity<SuccessResponse<TimetableResponse>> create(
@@ -53,7 +53,7 @@ public class BackofficeTimetableController {
 
   @Operation(
       summary = "일정 수정",
-      description = "제목, 상세 내용, 시작/종료시간을 전체 교체합니다. 투표 일정 여부는 수정할 수 없습니다.")
+      description = "제목, 상세 내용, 시작/종료시간을 전체 교체합니다. 다른 일정과 시간이 겹칠 수 없으며, 투표 일정 여부는 수정할 수 없습니다.")
   @PutMapping("/{timetableId}")
   public ResponseEntity<SuccessResponse<TimetableResponse>> update(
       @PathVariable Long timetableId,

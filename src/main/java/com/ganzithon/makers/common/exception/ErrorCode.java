@@ -34,6 +34,7 @@ public enum ErrorCode {
   // Timetable
   TIMETABLE_NOT_FOUND(HttpStatus.NOT_FOUND, "일정을 찾을 수 없습니다."),
   INVALID_TIMETABLE_TIME_RANGE(HttpStatus.BAD_REQUEST, "종료시간은 시작시간보다 늦어야 합니다."),
+  TIMETABLE_TIME_OVERLAP(HttpStatus.CONFLICT, "다른 일정과 시간이 겹칩니다."),
   VOTE_TIMETABLE_ALREADY_EXISTS(HttpStatus.CONFLICT, "투표 일정은 하나만 등록할 수 있습니다."),
   VOTE_TIMETABLE_NOT_DELETABLE(HttpStatus.CONFLICT, "투표 일정은 삭제할 수 없습니다."),
   VOTE_TIMETABLE_NOT_FOUND(HttpStatus.NOT_FOUND, "투표 일정이 등록되지 않았습니다."),
