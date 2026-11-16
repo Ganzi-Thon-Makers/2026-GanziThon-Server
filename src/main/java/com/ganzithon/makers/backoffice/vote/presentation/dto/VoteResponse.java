@@ -1,7 +1,7 @@
 package com.ganzithon.makers.backoffice.vote.presentation.dto;
 
-import com.ganzithon.makers.service.domain.timetable.domain.Timetable;
-import com.ganzithon.makers.service.domain.timetable.domain.VoteStatus;
+import com.ganzithon.makers.platform.domain.timetable.domain.Timetable;
+import com.ganzithon.makers.platform.domain.timetable.domain.VoteStatus;
 import java.time.LocalDateTime;
 
 public record VoteResponse(

@@ -3,7 +3,7 @@ package com.ganzithon.makers.backoffice.vote.application;
 import com.ganzithon.makers.backoffice.timetable.application.BackofficeTimetableService;
 import com.ganzithon.makers.backoffice.vote.presentation.dto.VoteResponse;
 import com.ganzithon.makers.backoffice.vote.presentation.dto.VoteTimeUpdateRequest;
-import com.ganzithon.makers.service.domain.timetable.domain.Timetable;
+import com.ganzithon.makers.platform.domain.timetable.domain.Timetable;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;

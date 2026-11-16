@@ -6,6 +6,8 @@ import com.ganzithon.makers.backoffice.timetable.presentation.dto.TimetableUpdat
 import com.ganzithon.makers.common.exception.BusinessException;
 import com.ganzithon.makers.common.exception.ErrorCode;
 import com.ganzithon.makers.platform.domain.timetable.domain.Timetable;
+import java.time.Clock;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -19,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class BackofficeTimetableService {
 
   private final TimetableRepository timetableRepository;
+  private final Clock clock;
 
   public List<Timetable> findAllOrdered() {
     return timetableRepository.findAllByOrderByStartTimeAscEndTimeAscIdAsc();
@@ -29,7 +32,11 @@ public class BackofficeTimetableService {
         .orElseThrow(() -> new BusinessException(ErrorCode.TIMETABLE_NOT_FOUND));
   }
 
-  // TODO: 투표 관리 기능 구현 시 VOTE 일정 조회 메서드 추가
+  // 투표 시간 조회용
+  public Timetable getVoteTimetable() {
+    return timetableRepository.findByVoteTrue()
+        .orElseThrow(() -> new BusinessException(ErrorCode.VOTE_TIMETABLE_NOT_FOUND));
+  }
 
   @Transactional
   public Timetable create(TimetableCreateRequest request) {
