@@ -1,0 +1,50 @@
+server:
+  port: ${SERVER_PORT}
+  forward-headers-strategy: framework
+
+spring:
+  datasource:
+    url: ${DEV_DB_URL}
+    username: ${DEV_DB_USER}
+    password: ${DEV_DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+
+  servlet:
+    multipart:
+      # nginx client_max_body_size(20m)와 맞춤
+      max-file-size: 20MB
+      max-request-size: 25MB
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    urls-primary-name: Platform API
+    display-request-duration: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+
+ncp:
+  storage:
+    endpoint: https://kr.object.ncloudstorage.com
+    region: kr-standard
+    bucket: ${NCP_BUCKET}
+    access-key: ${NCP_ACCESS_KEY}
+    secret-key: ${NCP_SECRET_KEY}
+    public-base-url: ${ncp.storage.endpoint}/${ncp.storage.bucket}
+app:
+  cors:
+    allowed-origin-patterns: http://localhost:[*],http://127.0.0.1:[*],https://dev-api.ganzithon.com,https://ganzithon.com,https://admin.ganzithon.com
