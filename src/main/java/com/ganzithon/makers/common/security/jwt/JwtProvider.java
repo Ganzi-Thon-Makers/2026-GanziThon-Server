@@ -1,6 +1,6 @@
 package com.ganzithon.makers.common.security.jwt;
 
-import com.ganzithon.makers.common.security.AuthUser;
+import com.ganzithon.makers.common.security.AuthPrincipal;
 import com.ganzithon.makers.platform.domain.user.domain.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -29,7 +29,7 @@ public class JwtProvider {
 
     public JwtProvider(
             @Value("${jwt.secret}") String secret,
-            @Value("${jwt.expiry-ms}") long expiryMs
+            @Value("${jwt.access-expiry-ms}") long expiryMs
     ) {
         this.key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
         this.expiryMs = expiryMs;
@@ -47,7 +47,7 @@ public class JwtProvider {
                 .compact();
     }
 
-    public Optional<AuthUser> parseAuthUser(String token) {
+    public Optional<AuthPrincipal> parseAuthUser(String token) {
         try {
             Claims claims = Jwts.parser().verifyWith(key).build()
                     .parseSignedClaims(token).getPayload();
@@ -55,11 +55,11 @@ public class JwtProvider {
             if (sessionId == null) {
                 return Optional.empty();
             }
-            return Optional.of(new AuthUser(
+            return Optional.of(new AuthPrincipal(
                     Long.valueOf(claims.getSubject()),
                     Role.valueOf(claims.get(CLAIM_ROLE, String.class)),
                     sessionId));
-        } catch (JwtException | IllegalArgumentException e) {
+        } catch (JwtException | IllegalArgumentException e) {   // 위조, 만료, 잘못된 role/subject 등
             return Optional.empty();
         }
     }

@@ -2,8 +2,8 @@ package com.ganzithon.makers.common.security.jwt;
 
 import com.ganzithon.makers.common.exception.BusinessException;
 import com.ganzithon.makers.common.exception.ErrorCode;
-import com.ganzithon.makers.common.security.AuthUser;
-import com.ganzithon.makers.common.security.SecurityErrorResponseWriter;
+import com.ganzithon.makers.common.security.AuthPrincipal;
+import com.ganzithon.makers.common.security.SecurityPaths;
 import com.ganzithon.makers.platform.domain.auth.infrastructure.LoginSessionRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -12,25 +12,36 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.Set;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.servlet.HandlerExceptionResolver;
+
 
 @Component
-@RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private static final Set<String> SKIP_PATHS = Set.of("/api/v1/login", "/auth/backoffice/login");
+    private static final Set<String> SKIP_PATHS = Set.of(SecurityPaths.LOGIN, SecurityPaths.BACKOFFICE_LOGIN);
 
     private final JwtProvider jwtProvider;
     private final LoginSessionRepository loginSessionRepository;
-    private final SecurityErrorResponseWriter errorResponseWriter;
+    private final HandlerExceptionResolver resolver;
+
+    public JwtAuthenticationFilter(
+            JwtProvider jwtProvider,
+            LoginSessionRepository loginSessionRepository,
+            @Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver
+    ) {
+        this.jwtProvider = jwtProvider;
+        this.loginSessionRepository = loginSessionRepository;
+        this.resolver = resolver;
+    }
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return SKIP_PATHS.contains(request.getRequestURI());
+        return SKIP_PATHS.contains(request.getServletPath());
     }
 
     @Override
@@ -42,16 +53,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = jwtProvider.resolveToken(request);
 
         if (token != null) {
-            Optional<AuthUser> parsed = jwtProvider.parseAuthUser(token);
+            Optional<AuthPrincipal> parsed = jwtProvider.parseAuthUser(token);
             if (parsed.isPresent()) {
-                AuthUser authUser = parsed.get();
+                AuthPrincipal principal = parsed.get();
                 try {
-                    validateSession(authUser);
+                    validateSession(principal);
                     SecurityContextHolder.getContext().setAuthentication(
-                            new UsernamePasswordAuthenticationToken(authUser, null, authUser.authorities()));
+                            new UsernamePasswordAuthenticationToken(principal, null, principal.authorities()));
                 } catch (BusinessException e) {
                     SecurityContextHolder.clearContext();
-                    errorResponseWriter.write(response, e.getErrorCode(), e.getMessage());
+                    resolver.resolveException(request, response, null, e);   // 기존 예외 처리에 위임
                     return;
                 }
             } else {
@@ -62,9 +73,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         chain.doFilter(request, response);
     }
 
-    private void validateSession(AuthUser authUser) {
-        if (!loginSessionRepository.existsBySessionId(authUser.sessionId())) {
-            throw new BusinessException(authUser.role().isSingleDevice()
+    private void validateSession(AuthPrincipal principal) {
+        if (!loginSessionRepository.existsBySessionId(principal.sessionId())) {
+            throw new BusinessException(principal.role().isSingleDevice()
                     ? ErrorCode.LOGGED_IN_ELSEWHERE
                     : ErrorCode.UNAUTHORIZED);
         }

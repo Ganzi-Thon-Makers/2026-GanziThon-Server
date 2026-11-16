@@ -1,13 +1,11 @@
 package com.ganzithon.makers.common.security;
 
-import com.ganzithon.makers.platform.domain.user.domain.Role;
-import java.util.List;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public record AuthUser(Long userId, Role role, String sessionId) {
-
-    public List<GrantedAuthority> authorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
-    }
+@Target(ElementType.PARAMETER)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface AuthUser {
 }
