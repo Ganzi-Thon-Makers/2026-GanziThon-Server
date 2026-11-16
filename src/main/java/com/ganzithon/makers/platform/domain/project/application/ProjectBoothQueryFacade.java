@@ -10,6 +10,7 @@ import com.ganzithon.makers.platform.domain.user.application.UserService;
 import com.ganzithon.makers.platform.domain.user.domain.Part;
 import com.ganzithon.makers.platform.domain.user.domain.User;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,25 +57,28 @@ public class ProjectBoothQueryFacade {
   public ProjectDetailResponse getProjectDetail(Long projectId) {
     Project project = projectService.findById(projectId);
     Booth booth = boothService.findByProjectId(projectId);
-    Map<Part, List<String>> members = getMembersGroupedByPart(projectId);
+    List<ProjectDetailResponse.PartMembers> members = getMembersGroupedByPart(projectId);
     return ProjectDetailResponse.of(project, booth, members);
   }
 
-  private Map<Part, List<String>> getMembersGroupedByPart(Long projectId) {
+  private List<ProjectDetailResponse.PartMembers> getMembersGroupedByPart(Long projectId) {
     List<User> members = userService.findAllByProjectId(projectId);
 
-    Map<Part, List<String>> result = new LinkedHashMap<>();
-    for (Part part : Part.values()) {
-      result.put(part, new ArrayList<>());
-    }
-
+    Map<Part, List<String>> grouped = new EnumMap<>(Part.class);
     for (User member : members) {
       if (member.getPart() == null) {
         continue;
       }
-      result.get(member.getPart()).add(member.getName());
+      grouped.computeIfAbsent(member.getPart(), part -> new ArrayList<>()).add(member.getName());
     }
 
+    List<ProjectDetailResponse.PartMembers> result = new ArrayList<>();
+    for (Part part : Part.values()) {
+      List<String> names = grouped.get(part);
+      if (names != null) {
+        result.add(new ProjectDetailResponse.PartMembers(part, names));
+      }
+    }
     return result;
   }
 }
