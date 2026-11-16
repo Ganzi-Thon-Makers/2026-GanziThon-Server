@@ -34,12 +34,14 @@ public class BackofficeTimetableService {
   @Transactional
   public Timetable create(TimetableCreateRequest request) {
     if (!request.isVote()) {
-      return timetableRepository.save(Timetable.create(
+      Timetable timetable = Timetable.create(
           request.title(),
           request.description(),
           request.startTime(),
           request.endTime()
-      ));
+      );
+      validateNotOverlapping(timetable, null);
+      return timetableRepository.save(timetable);
     }
     return createVote(request);
   }
@@ -55,6 +57,7 @@ public class BackofficeTimetableService {
         request.startTime(),
         request.endTime()
     );
+    validateNotOverlapping(vote, null);
     try {
       return timetableRepository.saveAndFlush(vote);
     } catch (DataIntegrityViolationException e) {
@@ -72,6 +75,8 @@ public class BackofficeTimetableService {
         request.startTime(),
         request.endTime()
     );
+    // 겹침 조회 전에 수정 내용이 먼저 반영(flush)되더라도, 예외 발생 시 트랜잭션이 롤백된다
+    validateNotOverlapping(timetable, timetableId);
     return timetable;
   }
 
@@ -80,5 +85,13 @@ public class BackofficeTimetableService {
     Timetable timetable = findById(timetableId);
     timetable.validateDeletable();
     timetableRepository.delete(timetable);
+  }
+
+  // 다른 일정과 시간이 겹치면 등록/수정할 수 없음 (끝과 시작이 맞닿는 것은 허용)
+  // 시간 순서(종료 > 시작) 검증은 엔티티에서 먼저 끝난 상태로 호출
+  private void validateNotOverlapping(Timetable timetable, Long excludeId) {
+    if (timetableRepository.existsOverlapping(timetable.getStartTime(), timetable.getEndTime(), excludeId)) {
+      throw new BusinessException(ErrorCode.TIMETABLE_TIME_OVERLAP);
+    }
   }
 }
