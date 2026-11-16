@@ -59,7 +59,7 @@ public class JwtProvider {
                     Long.valueOf(claims.getSubject()),
                     Role.valueOf(claims.get(CLAIM_ROLE, String.class)),
                     sessionId));
-        } catch (JwtException | IllegalArgumentException e) {   // 위조, 만료, 잘못된 role/subject 등
+        } catch (JwtException | IllegalArgumentException e) {
             return Optional.empty();
         }
     }
