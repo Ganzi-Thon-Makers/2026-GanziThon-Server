@@ -24,4 +24,8 @@ public class BoothService {
     return boothRepository.findByProjectId(projectId)
         .orElseThrow(() -> new BusinessException(ErrorCode.BOOTH_NOT_FOUND));
   }
+
+  public List<Booth> findAllByIds(List<Long> boothIds) {
+    return boothRepository.findAllById(boothIds);
+  }
 }

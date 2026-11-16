@@ -29,3 +29,8 @@ jwt:
   secret: ${JWT_SECRET}
   access-expiry-ms: 86400000
   refresh-expiry-ms: 2592000000
+
+stamp:
+  qr-token-ttl-seconds: 60
+  qr-token-grace-seconds: 10
+  recollect-cooldown-seconds: 300
