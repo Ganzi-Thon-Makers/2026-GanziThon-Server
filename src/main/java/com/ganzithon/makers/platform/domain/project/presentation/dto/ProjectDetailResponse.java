@@ -6,7 +6,6 @@ import com.ganzithon.makers.platform.domain.project.domain.Platform;
 import com.ganzithon.makers.platform.domain.project.domain.Project;
 import com.ganzithon.makers.platform.domain.user.domain.Part;
 import java.util.List;
-import java.util.Map;
 
 public record ProjectDetailResponse(
     Long id,
@@ -20,10 +19,15 @@ public record ProjectDetailResponse(
     Platform platform,
     Zone zone,
     Integer boothNumber,
-    Map<Part, List<String>> members
+    List<PartMembers> members
 ) {
 
-  public static ProjectDetailResponse of(Project project, Booth booth, Map<Part, List<String>> members) {
+  public record PartMembers(
+      Part part,
+      List<String> names
+  ) {}
+
+  public static ProjectDetailResponse of(Project project, Booth booth, List<PartMembers> members) {
     return new ProjectDetailResponse(
         project.getId(),
         project.getTitle(),
