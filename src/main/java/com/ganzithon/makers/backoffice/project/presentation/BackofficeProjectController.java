@@ -1,20 +1,30 @@
 package com.ganzithon.makers.backoffice.project.presentation;
 
 import com.ganzithon.makers.backoffice.project.application.BackofficeProjectService;
+import com.ganzithon.makers.backoffice.project.presentation.dto.ProjectCreateRequest;
 import com.ganzithon.makers.backoffice.project.presentation.dto.ProjectDetailResponse;
 import com.ganzithon.makers.backoffice.project.presentation.dto.ProjectListResponse;
 import com.ganzithon.makers.common.dto.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Encoding;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 // TODO: 관리자 권한 체크 필요
 @Tag(name = "Backoffice - 프로젝트 관리")
@@ -43,5 +53,21 @@ public class BackofficeProjectController {
   @GetMapping("/{projectId}")
   public ResponseEntity<SuccessResponse<ProjectDetailResponse>> getProject(@PathVariable Long projectId) {
     return ResponseEntity.ok(SuccessResponse.of(backofficeProjectService.getProject(projectId)));
+  }
+
+  @Operation(
+      summary = "프로젝트 등록",
+      description = "multipart/form-data 로 request와 대표 이미지 파일을 함께 보냅니다. "
+          + "members 에는 팀원 최종 목록을 보내며, 이미 다른 프로젝트에 소속된 회원은 등록할 수 없습니다.")
+  @RequestBody(content = @Content(
+      mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
+      encoding = @Encoding(name = "request", contentType = MediaType.APPLICATION_JSON_VALUE)))
+  @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ResponseEntity<SuccessResponse<ProjectDetailResponse>> create(
+      @Valid @RequestPart("request") ProjectCreateRequest request,
+      @RequestPart("thumbnail") MultipartFile thumbnail
+  ) {
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(SuccessResponse.of(backofficeProjectService.create(request, thumbnail)));
   }
 }

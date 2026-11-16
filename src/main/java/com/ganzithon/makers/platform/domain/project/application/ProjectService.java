@@ -29,6 +29,11 @@ public class ProjectService {
     return projectRepository.findAllByTitleContainingIgnoreCase(keyword);
   }
 
+  @Transactional
+  public Project save(Project project) {
+    return projectRepository.save(project);
+  }
+
   public List<Project> findAllByIds(List<Long> projectIds) {
     return projectRepository.findAllById(projectIds);
   }
