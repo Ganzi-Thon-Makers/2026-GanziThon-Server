@@ -2,7 +2,6 @@ package com.ganzithon.makers.backoffice.project.presentation.dto;
 
 import com.ganzithon.makers.platform.domain.project.domain.Platform;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -21,9 +20,8 @@ public record ProjectUpdateRequest(
     @NotBlank @Size(max = 100)
     String teamName,
 
-    @Schema(description = "팀원 최종 목록. 빠진 회원은 프로젝트에서 연결 해제됨 (비어 있어도 됨)")
-    @Valid
-    List<ProjectMemberRequest> members,
+    @Schema(description = "팀원(회원 id) 최종 목록. 빠진 회원은 프로젝트에서 연결 해제됨. 파트는 회원 정보의 파트를 사용 (비어 있어도 됨)", example = "[1, 2]")
+    List<@NotNull Long> memberIds,
 
     @Schema(example = "React, TypeScript, Spring Boot 3, MySQL 8, NCP Object Storage, Kakao Map API")
     @NotBlank @Size(max = 500)
@@ -45,7 +43,7 @@ public record ProjectUpdateRequest(
     Platform platform
 ) {
 
-  public List<ProjectMemberRequest> membersOrEmpty() {
-      return members == null ? List.of() : members;
+  public List<Long> memberIdsOrEmpty() {
+      return memberIds == null ? List.of() : memberIds;
   }
 }

@@ -60,7 +60,7 @@ public class BackofficeProjectController {
   @Operation(
       summary = "프로젝트 등록",
       description = "multipart/form-data 로 request와 대표 이미지 파일을 함께 보냅니다. "
-          + "members 에는 팀원 최종 목록을 보내며, 이미 다른 프로젝트에 소속된 회원은 등록할 수 없습니다.")
+          + "memberIds 에는 팀원(회원 id) 최종 목록을 보내며, 이미 다른 프로젝트에 소속된 회원은 등록할 수 없습니다.")
   @RequestBody(content = @Content(
       mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
       encoding = @Encoding(name = "request", contentType = MediaType.APPLICATION_JSON_VALUE)))
@@ -77,7 +77,7 @@ public class BackofficeProjectController {
       summary = "프로젝트 수정",
       description = "multipart/form-data 로 request와 대표 이미지 파일을 함께 보냅니다. "
           + "대표 이미지를 바꾸지 않으면 thumbnail 은 보내지 않아도 됩니다. "
-          + "members 에는 팀원 최종 목록을 보내며, 목록에서 빠진 팀원은 프로젝트에서 연결 해제됩니다. "
+          + "memberIds 에는 팀원(회원 id) 최종 목록을 보내며, 목록에서 빠진 팀원은 프로젝트에서 연결 해제됩니다. "
           + "득표수는 수정할 수 없습니다.")
   @RequestBody(content = @Content(
       mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,

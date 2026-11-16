@@ -4,7 +4,6 @@ import com.ganzithon.makers.backoffice.image.storage.ImageStorage;
 import com.ganzithon.makers.backoffice.project.presentation.dto.ProjectCreateRequest;
 import com.ganzithon.makers.backoffice.project.presentation.dto.ProjectDetailResponse;
 import com.ganzithon.makers.backoffice.project.presentation.dto.ProjectListResponse;
-import com.ganzithon.makers.backoffice.project.presentation.dto.ProjectMemberRequest;
 import com.ganzithon.makers.backoffice.project.presentation.dto.ProjectUpdateRequest;
 import com.ganzithon.makers.common.exception.BusinessException;
 import com.ganzithon.makers.common.exception.ErrorCode;
@@ -66,8 +65,7 @@ public class BackofficeProjectService {
   @Transactional
   public ProjectDetailResponse create(ProjectCreateRequest request, MultipartFile thumbnail) {
     // 팀원 검증을 먼저 끝내서, 검증 실패 시 이미지가 업로드되지 않도록 함
-    List<ProjectMemberRequest> memberRequests = request.membersOrEmpty();
-    Map<Long, User> users = findMembers(memberRequests);
+    Map<Long, User> users = findMembers(request.memberIdsOrEmpty());
     users.values().forEach(user -> validateAssignable(user, null));
 
     String thumbnailUrl = imageStorage.upload(thumbnail, THUMBNAIL_DIRECTORY);
@@ -84,9 +82,7 @@ public class BackofficeProjectService {
         request.platform()
     ));
 
-    for (ProjectMemberRequest member : memberRequests) {
-      users.get(member.userId()).assignToProject(project.getId(), member.part());
-    }
+    users.values().forEach(user -> user.joinProject(project.getId()));
 
     return ProjectDetailResponse.of(project, 0L, toMembers(users.values()));
   }
@@ -97,8 +93,7 @@ public class BackofficeProjectService {
     Project project = projectService.findById(projectId);
 
     // 팀원 검증을 먼저 끝내서, 검증 실패 시 이미지가 업로드되지 않도록 함
-    List<ProjectMemberRequest> memberRequests = request.membersOrEmpty();
-    Map<Long, User> users = findMembers(memberRequests);
+    Map<Long, User> users = findMembers(request.memberIdsOrEmpty());
     users.values().forEach(user -> validateAssignable(user, projectId));
 
     if (thumbnail != null && !thumbnail.isEmpty()) {
@@ -119,23 +114,20 @@ public class BackofficeProjectService {
         request.platform()
     );
 
-    // 요청 목록에서 빠진 기존 팀원은 연결 해제, 요청 목록의 팀원은 연결(파트 변경 포함)
+    // 요청 목록에서 빠진 기존 팀원은 연결 해제, 요청 목록의 팀원은 연결
     for (User current : userService.findAllByProjectId(projectId)) {
       if (!users.containsKey(current.getId())) {
         current.leaveProject();
       }
     }
-    for (ProjectMemberRequest member : memberRequests) {
-      users.get(member.userId()).assignToProject(projectId, member.part());
-    }
+    users.values().forEach(user -> user.joinProject(projectId));
 
     long voteCount = voteService.countByProjectId(projectId);
     return ProjectDetailResponse.of(project, voteCount, toMembers(users.values()));
   }
 
   // 요청한 팀원(userId)을 조회. 중복이면 400, 없는 회원이 있으면 404
-  private Map<Long, User> findMembers(List<ProjectMemberRequest> memberRequests) {
-    List<Long> userIds = memberRequests.stream().map(ProjectMemberRequest::userId).toList();
+  private Map<Long, User> findMembers(List<Long> userIds) {
     if (new HashSet<>(userIds).size() != userIds.size()) {
       throw new BusinessException(ErrorCode.DUPLICATE_PROJECT_MEMBER);
     }
