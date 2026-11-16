@@ -28,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Component
-@Profile({"local", "dev"}) // 시드 계정(SUPER_ADMIN 포함)이 운영 환경에 생기지 않도록 제한
+@Profile({"local", "dev"})
 @RequiredArgsConstructor
 public class DataSeeder implements ApplicationRunner {
 
