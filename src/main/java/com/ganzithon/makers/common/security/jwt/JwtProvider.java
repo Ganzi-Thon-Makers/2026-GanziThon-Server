@@ -3,6 +3,7 @@ package com.ganzithon.makers.common.security.jwt;
 import com.ganzithon.makers.common.security.AuthPrincipal;
 import com.ganzithon.makers.platform.domain.user.domain.Role;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -26,13 +27,17 @@ public class JwtProvider {
     private final SecretKey key;
     @Getter
     private final long expiryMs;
+    @Getter
+    private final long refreshExpiryMs;
 
     public JwtProvider(
             @Value("${jwt.secret}") String secret,
-            @Value("${jwt.access-expiry-ms}") long expiryMs
+            @Value("${jwt.access-expiry-ms}") long expiryMs,
+            @Value("${jwt.refresh-expiry-ms}") long refreshExpiryMs
     ) {
         this.key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
         this.expiryMs = expiryMs;
+        this.refreshExpiryMs = refreshExpiryMs;
     }
 
     public String createToken(Long userId, Role role, String sessionId) {
@@ -61,6 +66,17 @@ public class JwtProvider {
                     sessionId));
         } catch (JwtException | IllegalArgumentException e) {   // 위조, 만료, 잘못된 role/subject 등
             return Optional.empty();
+        }
+    }
+
+    public boolean isExpiredToken(String token) {
+        try {
+            Jwts.parser().verifyWith(key).build().parseSignedClaims(token);
+            return false;
+        } catch (ExpiredJwtException e) {
+            return true;
+        } catch (JwtException | IllegalArgumentException e) {
+            return false;
         }
     }
 

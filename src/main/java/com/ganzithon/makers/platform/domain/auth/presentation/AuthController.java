@@ -5,6 +5,7 @@ import com.ganzithon.makers.common.security.AuthPrincipal;
 import com.ganzithon.makers.common.security.AuthUser;
 import com.ganzithon.makers.platform.domain.auth.application.AuthService;
 import com.ganzithon.makers.platform.domain.auth.application.dto.request.LoginRequest;
+import com.ganzithon.makers.platform.domain.auth.application.dto.request.RefreshRequest;
 import com.ganzithon.makers.platform.domain.auth.application.dto.response.LoginResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,15 +18,23 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
-public class AuthController {
+public class AuthController implements AuthApi {
 
     private final AuthService authService;
 
+    @Override
     @PostMapping("/login")
     public ResponseEntity<SuccessResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(SuccessResponse.of(authService.login(request)));
     }
 
+    @Override
+    @PostMapping("/refresh")
+    public ResponseEntity<SuccessResponse<LoginResponse>> refresh(@Valid @RequestBody RefreshRequest request) {
+        return ResponseEntity.ok(SuccessResponse.of(authService.refresh(request)));
+    }
+
+    @Override
     @PostMapping("/logout")
     public ResponseEntity<SuccessResponse<Void>> logout(@AuthUser AuthPrincipal principal) {
         authService.logout(principal);

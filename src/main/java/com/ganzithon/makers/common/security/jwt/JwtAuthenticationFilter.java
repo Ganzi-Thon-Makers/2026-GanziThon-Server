@@ -23,7 +23,9 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private static final Set<String> SKIP_PATHS = Set.of(SecurityPaths.LOGIN, SecurityPaths.BACKOFFICE_LOGIN);
+    private static final Set<String> SKIP_PATHS = Set.of(
+            SecurityPaths.LOGIN, SecurityPaths.REFRESH,
+            SecurityPaths.BACKOFFICE_LOGIN, SecurityPaths.BACKOFFICE_REFRESH);
 
     private final JwtProvider jwtProvider;
     private final LoginSessionRepository loginSessionRepository;
@@ -65,6 +67,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     resolver.resolveException(request, response, null, e);   // 기존 예외 처리에 위임
                     return;
                 }
+            } else if (jwtProvider.isExpiredToken(token)) {
+                SecurityContextHolder.clearContext();
+                resolver.resolveException(request, response, null,
+                        new BusinessException(ErrorCode.TOKEN_EXPIRED));   // 클라이언트는 refresh 호출
+                return;
             } else {
                 SecurityContextHolder.clearContext();   // 익명으로 통과 → 보호 API는 401
             }

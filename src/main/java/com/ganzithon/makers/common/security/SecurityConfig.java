@@ -41,7 +41,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // 인증 불필요
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers(SecurityPaths.LOGIN, SecurityPaths.BACKOFFICE_LOGIN).permitAll()
+                        .requestMatchers(
+                                SecurityPaths.LOGIN, SecurityPaths.REFRESH,
+                                SecurityPaths.BACKOFFICE_LOGIN, SecurityPaths.BACKOFFICE_REFRESH)
+                        .permitAll()
                         .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
 

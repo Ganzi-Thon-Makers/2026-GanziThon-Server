@@ -17,7 +17,8 @@ import lombok.NoArgsConstructor;
         name = "login_session",
         indexes = {
                 @Index(name = "idx_login_session_sid", columnList = "sessionId", unique = true),
-                @Index(name = "idx_login_session_user", columnList = "userId")
+                @Index(name = "idx_login_session_user", columnList = "userId"),
+                @Index(name = "idx_login_session_refresh", columnList = "refreshTokenHash", unique = true)
         }
 )
 @Getter
@@ -37,10 +38,33 @@ public class LoginSession {
     @Column(nullable = false)
     private LocalDateTime expiresAt;
 
-    public LoginSession(Long userId, String sessionId, LocalDateTime expiresAt) {
+    @Column(nullable = false, length = 64)
+    private String refreshTokenHash;
+
+    @Column(nullable = false)
+    private LocalDateTime refreshExpiresAt;
+
+    public LoginSession(
+            Long userId,
+            String sessionId,
+            LocalDateTime expiresAt,
+            String refreshTokenHash,
+            LocalDateTime refreshExpiresAt
+    ) {
         this.userId = userId;
         this.sessionId = sessionId;
         this.expiresAt = expiresAt;
+        this.refreshTokenHash = refreshTokenHash;
+        this.refreshExpiresAt = refreshExpiresAt;
+    }
+
+    public boolean isRefreshExpired(LocalDateTime now) {
+        return refreshExpiresAt.isBefore(now);
+    }
+
+    public void rotateRefreshToken(String newRefreshTokenHash, LocalDateTime newRefreshExpiresAt) {
+        this.refreshTokenHash = newRefreshTokenHash;
+        this.refreshExpiresAt = newRefreshExpiresAt;
     }
 
 }

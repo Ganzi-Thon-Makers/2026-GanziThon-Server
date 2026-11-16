@@ -3,8 +3,10 @@ package com.ganzithon.makers.platform.domain.auth.application;
 import com.ganzithon.makers.common.exception.BusinessException;
 import com.ganzithon.makers.common.exception.ErrorCode;
 import com.ganzithon.makers.common.security.AuthPrincipal;
+import com.ganzithon.makers.common.security.RefreshTokenHasher;
 import com.ganzithon.makers.common.security.jwt.JwtProvider;
 import com.ganzithon.makers.platform.domain.auth.application.dto.request.LoginRequest;
+import com.ganzithon.makers.platform.domain.auth.application.dto.request.RefreshRequest;
 import com.ganzithon.makers.platform.domain.auth.application.dto.response.LoginResponse;
 import com.ganzithon.makers.platform.domain.auth.domain.LoginSession;
 import com.ganzithon.makers.platform.domain.auth.infrastructure.LoginSessionRepository;
@@ -43,6 +45,29 @@ public class AuthService {
     }
 
     @Transactional
+    public LoginResponse refresh(RefreshRequest request) {
+        LoginSession session = loginSessionRepository
+                .findByRefreshTokenHash(RefreshTokenHasher.hash(request.refreshToken()))
+                .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN));
+
+        if (session.isRefreshExpired(LocalDateTime.now())) {
+            loginSessionRepository.deleteBySessionId(session.getSessionId());   // 자동 로그아웃
+            throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
+        }
+
+        User user = userRepository.findById(session.getUserId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN));
+
+        String newRefreshToken = UUID.randomUUID().toString();
+        session.rotateRefreshToken(
+                RefreshTokenHasher.hash(newRefreshToken),
+                LocalDateTime.now().plus(Duration.ofMillis(jwtProvider.getRefreshExpiryMs())));
+
+        String accessToken = jwtProvider.createToken(user.getId(), user.getRole(), session.getSessionId());
+        return new LoginResponse(accessToken, newRefreshToken, user.getRole());
+    }
+
+    @Transactional
     public void logout(AuthPrincipal principal) {
         loginSessionRepository.deleteBySessionId(principal.sessionId());
     }
@@ -62,12 +87,16 @@ public class AuthService {
         }
 
         String sessionId = UUID.randomUUID().toString();
+        String refreshToken = UUID.randomUUID().toString();
+        LocalDateTime now = LocalDateTime.now();
         loginSessionRepository.save(new LoginSession(
                 user.getId(),
                 sessionId,
-                LocalDateTime.now().plus(Duration.ofMillis(jwtProvider.getExpiryMs()))));
+                now.plus(Duration.ofMillis(jwtProvider.getExpiryMs())),
+                RefreshTokenHasher.hash(refreshToken),
+                now.plus(Duration.ofMillis(jwtProvider.getRefreshExpiryMs()))));
 
         String accessToken = jwtProvider.createToken(user.getId(), user.getRole(), sessionId);
-        return new LoginResponse(accessToken, user.getRole());
+        return new LoginResponse(accessToken, refreshToken, user.getRole());
     }
 }
