@@ -23,6 +23,6 @@ public interface LoginSessionRepository extends JpaRepository<LoginSession, Long
     void deleteByUserId(@Param("userId") Long userId);
 
     @Modifying
-    @Query("delete from LoginSession s where s.expiresAt < :now")
+    @Query("delete from LoginSession s where s.refreshExpiresAt < :now")
     void deleteExpired(@Param("now") LocalDateTime now);
 }
