@@ -96,4 +96,9 @@ public class User extends BaseEntity {
         this.projectId = projectId;
         this.part = part;
     }
+
+    public void leaveProject() {
+        this.projectId = null;
+        this.part = null;
+    }
 }

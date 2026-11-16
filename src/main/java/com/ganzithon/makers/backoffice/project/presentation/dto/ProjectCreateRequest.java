@@ -1,7 +1,6 @@
 package com.ganzithon.makers.backoffice.project.presentation.dto;
 
 import com.ganzithon.makers.platform.domain.project.domain.Platform;
-import com.ganzithon.makers.platform.domain.user.domain.Part;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -24,7 +23,7 @@ public record ProjectCreateRequest(
 
     @Schema(description = "팀원 최종 목록 (비어 있어도 됨)")
     @Valid
-    List<MemberRequest> members,
+    List<ProjectMemberRequest> members,
 
     @Schema(example = "React, TypeScript, Spring Boot 3, MySQL 8, NCP Object Storage, Kakao Map API")
     @NotBlank @Size(max = 500)
@@ -45,17 +44,8 @@ public record ProjectCreateRequest(
     @NotNull
     Platform platform
 ) {
-  public record MemberRequest(
-      @Schema(example = "1")
-      @NotNull
-      Long userId,
 
-      @Schema(example = "PLAN")
-      @NotNull
-      Part part
-  ) {}
-
-  public List<MemberRequest> membersOrEmpty() {
+  public List<ProjectMemberRequest> membersOrEmpty() {
     return members == null ? List.of() : members;
   }
 }

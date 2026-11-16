@@ -4,6 +4,7 @@ import com.ganzithon.makers.backoffice.project.application.BackofficeProjectServ
 import com.ganzithon.makers.backoffice.project.presentation.dto.ProjectCreateRequest;
 import com.ganzithon.makers.backoffice.project.presentation.dto.ProjectDetailResponse;
 import com.ganzithon.makers.backoffice.project.presentation.dto.ProjectListResponse;
+import com.ganzithon.makers.backoffice.project.presentation.dto.ProjectUpdateRequest;
 import com.ganzithon.makers.common.dto.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -20,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -69,5 +71,23 @@ public class BackofficeProjectController {
   ) {
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(SuccessResponse.of(backofficeProjectService.create(request, thumbnail)));
+  }
+
+  @Operation(
+      summary = "프로젝트 수정",
+      description = "multipart/form-data 로 request와 대표 이미지 파일을 함께 보냅니다. "
+          + "대표 이미지를 바꾸지 않으면 thumbnail 은 보내지 않아도 됩니다. "
+          + "members 에는 팀원 최종 목록을 보내며, 목록에서 빠진 팀원은 프로젝트에서 연결 해제됩니다. "
+          + "득표수는 수정할 수 없습니다.")
+  @RequestBody(content = @Content(
+      mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
+      encoding = @Encoding(name = "request", contentType = MediaType.APPLICATION_JSON_VALUE)))
+  @PutMapping(value = "/{projectId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ResponseEntity<SuccessResponse<ProjectDetailResponse>> update(
+      @PathVariable Long projectId,
+      @Valid @RequestPart("request") ProjectUpdateRequest request,
+      @RequestPart(value = "thumbnail", required = false) MultipartFile thumbnail
+  ) {
+    return ResponseEntity.ok(SuccessResponse.of(backofficeProjectService.update(projectId, request, thumbnail)));
   }
 }

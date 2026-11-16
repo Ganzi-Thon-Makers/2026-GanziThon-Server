@@ -84,4 +84,26 @@ public class Project extends BaseEntity {
             platform
         );
     }
+
+    public void update(
+        String title,
+        String teamName,
+        String summary,
+        String description,
+        String serviceUrl,
+        String techStack,
+        Platform platform
+    ) {
+        this.title = title;
+        this.teamName = teamName;
+        this.summary = summary;
+        this.description = description;
+        this.serviceUrl = serviceUrl;
+        this.techStack = techStack;
+        this.platform = platform;
+    }
+
+    public void changeThumbnail(String thumbnailUrl) {
+        this.thumbnailUrl = thumbnailUrl;
+    }
 }
