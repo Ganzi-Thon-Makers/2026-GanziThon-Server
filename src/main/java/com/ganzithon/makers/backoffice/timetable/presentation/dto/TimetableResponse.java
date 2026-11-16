@@ -1,6 +1,6 @@
 package com.ganzithon.makers.backoffice.timetable.presentation.dto;
 
-import com.ganzithon.makers.service.domain.timetable.domain.Timetable;
+import com.ganzithon.makers.platform.domain.timetable.domain.Timetable;
 import java.time.LocalDateTime;
 
 public record TimetableResponse(
