@@ -18,7 +18,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,7 +33,6 @@ public class DataSeeder implements ApplicationRunner {
   private final BoothRepository boothRepository;
   private final TimetableRepository timetableRepository;
   private final UserRepository userRepository;
-  private final PasswordEncoder passwordEncoder;
 
   @Override
   @Transactional
@@ -223,7 +221,7 @@ public class DataSeeder implements ApplicationRunner {
       for (int j = 0; j < names.length; j++) {
         User user = User.create(
             String.format("team%02d_%d", teamNumber, j + 1),
-            passwordEncoder.encode("seed_password"),
+            "seed_password",
             names[j],
             String.format("010-1234-%04d", teamNumber * 10 + j),
             "메이커스대학교",
