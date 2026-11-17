@@ -70,7 +70,10 @@ public class BackofficeUserController {
 
   @Operation(
       summary = "참가자 수정 (SUPER_ADMIN 전용)",
-      description = "전체 교체 방식입니다. 비밀번호는 바꿀 때만 보내며, 바꾸면 해당 참가자는 로그아웃됩니다. "
+      description = "전체 교체 방식이라 상세 조회 값으로 채운 폼 전체를 보냅니다. "
+          + "비밀번호는 바꿀 때만 보내고, 바꾸지 않으면 password 를 빼거나 null 로 보냅니다. (빈 문자열은 400) "
+          + "비밀번호를 바꾸면 해당 참가자는 로그아웃됩니다. "
+          + "다른 회원이 쓰는 아이디면 409이므로, Swagger 예시의 loginId 는 대상 회원의 아이디로 바꿔서 테스트하세요. "
           + "럭키드로우 응모·수료 여부는 수정할 수 없습니다.")
   @PutMapping("/{userId}")
   public ResponseEntity<SuccessResponse<UserDetailResponse>> update(

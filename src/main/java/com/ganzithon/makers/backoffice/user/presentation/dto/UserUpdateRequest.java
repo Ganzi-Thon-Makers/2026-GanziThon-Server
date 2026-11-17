@@ -11,13 +11,14 @@ import jakarta.validation.constraints.Size;
 
 // 럭키드로우 응모·수료 여부는 수정 대상이 아니라 받지 않음. 검증 규칙은 등록과 같음
 public record UserUpdateRequest(
-    @Schema(description = "영문, 숫자, _ 만 가능", example = "participant01")
+    @Schema(description = "영문, 숫자, _ 만 가능. 바꾸지 않으려면 상세 조회의 loginId 를 그대로 보내세요.", example = "participant01")
     @NotBlank @Size(max = 50)
     @Pattern(regexp = "^[A-Za-z0-9_]+$", message = "영문, 숫자, _ 만 사용할 수 있습니다.")
     String loginId,
 
     // 생략(null)하면 기존 비밀번호 유지. 빈 문자열은 형식 오류
-    @Schema(description = "변경할 때만 입력 (생략 시 유지). 공백 없는 영문, 숫자, 특수문자", example = "newpassword1234!")
+    @Schema(description = "바꿀 때만 입력. 바꾸지 않으려면 password 필드를 빼거나 null 로 보내세요. (빈 문자열은 400) "
+        + "공백 없는 영문, 숫자, 특수문자", example = "newpassword1234!")
     @Size(max = 72)
     @Pattern(regexp = "^[\\x21-\\x7E]+$", message = "공백 없이 영문, 숫자, 특수문자만 사용할 수 있습니다.")
     String password,
