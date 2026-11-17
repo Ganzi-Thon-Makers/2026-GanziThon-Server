@@ -16,10 +16,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-// TODO: SUPER_ADMIN 전용 체크 필요
 @Tag(name = "Backoffice - 투표 관리", description = "슈퍼 어드민 전용")
 @RestController
-@RequestMapping("/api/backoffice/vote")
+@RequestMapping("/backoffice/api/v1/vote")
 @RequiredArgsConstructor
 public class BackofficeVoteController {
 
