@@ -1,11 +1,11 @@
 package com.ganzithon.makers.backoffice.timetable.application;
 
-import com.ganzithon.makers.backoffice.timetable.infrastructure.TimetableRepository;
 import com.ganzithon.makers.backoffice.timetable.presentation.dto.TimetableCreateRequest;
 import com.ganzithon.makers.backoffice.timetable.presentation.dto.TimetableUpdateRequest;
 import com.ganzithon.makers.common.exception.BusinessException;
 import com.ganzithon.makers.common.exception.ErrorCode;
 import com.ganzithon.makers.platform.domain.timetable.domain.Timetable;
+import com.ganzithon.makers.platform.domain.timetable.infrastructure.TimetableRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;

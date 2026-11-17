@@ -21,10 +21,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-// TODO: SUPER_ADMIN 전용 체크 구현 필요
 @Tag(name = "Backoffice - 타임테이블 관리", description = "슈퍼 어드민 전용")
 @RestController
-@RequestMapping("/api/backoffice/timetables")
+@RequestMapping("/backoffice/api/v1/timetables")
 @RequiredArgsConstructor
 public class BackofficeTimetableController {
 
