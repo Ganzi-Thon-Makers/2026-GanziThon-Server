@@ -30,6 +30,16 @@ public class UserService {
     return userRepository.findAllById(userIds);
   }
 
+  public boolean existsByLoginId(String loginId) {
+    return userRepository.existsByLoginId(loginId);
+  }
+
+  // login_id UNIQUE 위반을 호출한 쪽에서 바로 잡을 수 있도록 즉시 flush
+  @Transactional
+  public User save(User user) {
+    return userRepository.saveAndFlush(user);
+  }
+
   // 이름 부분 일치 + 럭키드로우 응모/수료 여부 필터 (null 인 조건은 적용 안 함). 이름 가나다순
   public List<User> search(Role role, String nameKeyword, Boolean luckyDrawEntered, Boolean completed) {
     return userRepository.search(role, toContainsPattern(nameKeyword), luckyDrawEntered, completed);

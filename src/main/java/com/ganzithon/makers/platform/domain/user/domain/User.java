@@ -92,6 +92,29 @@ public class User extends BaseEntity {
         );
     }
 
+    // 백오피스 참가자 등록용. 럭키드로우 응모·수료 여부는 false 로 시작
+    public static User createParticipant(
+        String loginId,
+        String encodedPassword,
+        String name,
+        String phoneNumber,
+        String school,
+        Integer teamNumber,
+        Part part
+    ) {
+        User user = new User(
+            loginId,
+            encodedPassword,
+            name,
+            phoneNumber,
+            school,
+            Role.PARTICIPANT,
+            teamNumber
+        );
+        user.part = part;
+        return user;
+    }
+
     public void assignToProject(Long projectId, Part part) {
         this.projectId = projectId;
         this.part = part;
