@@ -6,6 +6,7 @@ import com.ganzithon.makers.backoffice.timetable.presentation.dto.TimetableUpdat
 import com.ganzithon.makers.common.exception.BusinessException;
 import com.ganzithon.makers.common.exception.ErrorCode;
 import com.ganzithon.makers.platform.domain.timetable.domain.Timetable;
+import com.ganzithon.makers.platform.domain.timetable.infrastructure.TimetableRepository;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class BackofficeTimetableService {
 
   private final TimetableRepository timetableRepository;
-  private final Clock clock;
 
   public List<Timetable> findAllOrdered() {
     return timetableRepository.findAllByOrderByStartTimeAscEndTimeAscIdAsc();

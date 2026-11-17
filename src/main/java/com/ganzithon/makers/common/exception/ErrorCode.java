@@ -41,6 +41,12 @@ public enum ErrorCode {
   VOTE_IN_PROGRESS(HttpStatus.CONFLICT, "투표가 진행 중이라 시간을 수정할 수 없습니다. 일시중지 후 수정해 주세요."),
 
   INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류가 발생했습니다."),
+
+  //User
+  INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "아이디 또는 비밀번호가 올바르지 않습니다."),
+  TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "토큰이 만료되었습니다."),
+  INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다. 다시 로그인해주세요."),
+  LOGGED_IN_ELSEWHERE(HttpStatus.UNAUTHORIZED, "다른 기기에서 로그인되어 로그아웃되었습니다."),
   ;
 
   private final HttpStatus status;
