@@ -34,3 +34,4 @@ stamp:
   qr-token-ttl-seconds: 60
   qr-token-grace-seconds: 10
   recollect-cooldown-seconds: 300
+  zone-completion-threshold: 5

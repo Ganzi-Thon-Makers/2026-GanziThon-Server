@@ -8,11 +8,21 @@ public record StampBoardResponse(
     int collectedCount,
     int remainingToLuckyDraw,
     boolean luckyDrawEntered,
-    List<CollectedStamp> stamps
+    List<ZoneStatus> zoneStatuses
 ) {
+
+  public record ZoneStatus(
+      Zone zone,
+      int totalBooths,
+      int collectedCount,
+      int remainingCount,
+      boolean completed,
+      List<CollectedStamp> stamps
+  ) {}
 
   public record CollectedStamp(
       Long boothId,
+      String boothName,
       Zone zone,
       Integer boothNumber,
       LocalDateTime collectedAt

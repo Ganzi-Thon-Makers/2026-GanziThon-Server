@@ -6,5 +6,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record StampProperties(
     long qrTokenTtlSeconds,
     long qrTokenGraceSeconds,
-    long recollectCooldownSeconds
+    long recollectCooldownSeconds,
+    int zoneCompletionThreshold
 ) {}
