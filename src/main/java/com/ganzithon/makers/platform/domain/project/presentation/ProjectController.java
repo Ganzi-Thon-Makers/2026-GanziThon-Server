@@ -1,12 +1,12 @@
 package com.ganzithon.makers.platform.domain.project.presentation;
 
-import com.ganzithon.makers.common.auth.CurrentUserProvider;
 import com.ganzithon.makers.common.dto.SuccessResponse;
+import com.ganzithon.makers.common.security.AuthPrincipal;
+import com.ganzithon.makers.common.security.AuthUser;
 import com.ganzithon.makers.platform.domain.booth.domain.Zone;
 import com.ganzithon.makers.platform.domain.project.application.ProjectBoothQueryFacade;
 import com.ganzithon.makers.platform.domain.project.presentation.dto.ProjectDetailResponse;
 import com.ganzithon.makers.platform.domain.project.presentation.dto.ProjectSummaryResponse;
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -22,13 +22,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class ProjectController {
 
   private final ProjectBoothQueryFacade projectBoothQueryFacade;
-  private final CurrentUserProvider currentUserProvider;
 
   @GetMapping
   public ResponseEntity<SuccessResponse<Map<Zone, List<ProjectSummaryResponse>>>> getProjects(
-      HttpServletRequest request) {
-    Long userId = currentUserProvider.findCurrentUserId(request);
-    return ResponseEntity.ok(SuccessResponse.of(projectBoothQueryFacade.getProjectsGroupedByZone(userId)));
+      @AuthUser AuthPrincipal principal) {
+    return ResponseEntity.ok(SuccessResponse.of(projectBoothQueryFacade.getProjectsGroupedByZone(principal.userId())));
   }
 
   @GetMapping("/{projectId}")
