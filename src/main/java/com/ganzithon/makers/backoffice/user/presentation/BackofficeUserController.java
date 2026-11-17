@@ -14,6 +14,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -77,5 +78,14 @@ public class BackofficeUserController {
       @Valid @RequestBody UserUpdateRequest request
   ) {
     return ResponseEntity.ok(SuccessResponse.of(backofficeUserService.update(userId, request)));
+  }
+
+  @Operation(
+      summary = "참가자 삭제 (SUPER_ADMIN 전용)",
+      description = "되돌릴 수 없습니다. 참가자의 투표도 함께 삭제되어, 투표했던 프로젝트의 득표수가 줄어듭니다.")
+  @DeleteMapping("/{userId}")
+  public ResponseEntity<SuccessResponse<Void>> delete(@PathVariable Long userId) {
+    backofficeUserService.delete(userId);
+    return ResponseEntity.ok(SuccessResponse.of("삭제되었습니다."));
   }
 }

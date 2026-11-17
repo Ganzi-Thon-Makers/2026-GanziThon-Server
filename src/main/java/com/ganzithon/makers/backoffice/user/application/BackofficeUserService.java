@@ -10,6 +10,7 @@ import com.ganzithon.makers.platform.domain.auth.application.AuthService;
 import com.ganzithon.makers.platform.domain.user.application.UserService;
 import com.ganzithon.makers.platform.domain.user.domain.Role;
 import com.ganzithon.makers.platform.domain.user.domain.User;
+import com.ganzithon.makers.platform.domain.vote.application.VoteService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -26,6 +27,7 @@ public class BackofficeUserService {
   private final UserService userService;
   private final PasswordEncoder passwordEncoder;
   private final AuthService authService;
+  private final VoteService voteService;
 
   // 관리 대상은 참가자만. 조건이 null 이면 해당 조건은 적용하지 않음
   public List<UserListResponse> getUsers(String keyword, Boolean luckyDrawEntered, Boolean completed) {
@@ -93,6 +95,17 @@ public class BackofficeUserService {
       authService.logoutAll(userId);
     }
     return UserDetailResponse.of(user);
+  }
+
+  // 물리 삭제. 회원의 투표, 로그인 세션도 함께 삭제 (투표했던 프로젝트의 득표수가 줄어듦)
+  // 프로젝트 팀원은 users.project_id 로만 연결되어 있어서 따로 처리할 것이 없음
+  @Transactional
+  public void delete(Long userId) {
+    User user = getParticipant(userId);
+    voteService.deleteAllByUserId(userId);
+    // TODO: 스탬프 삭제 (feat/stamp-qr-collection 머지 후 StampRepository 에 deleteByUserId 추가해서 호출)
+    authService.logoutAll(userId);
+    userService.delete(user);
   }
 
   // 참가자가 아닌 계정(TEAM, ADMIN 등)은 관리 대상이 아니므로 없는 회원과 같이 404

@@ -45,6 +45,11 @@ public class UserService {
     return userRepository.saveAndFlush(user);
   }
 
+  @Transactional
+  public void delete(User user) {
+    userRepository.delete(user);
+  }
+
   // 이름 부분 일치 + 럭키드로우 응모/수료 여부 필터 (null 인 조건은 적용 안 함). 이름 가나다순
   public List<User> search(Role role, String nameKeyword, Boolean luckyDrawEntered, Boolean completed) {
     return userRepository.search(role, toContainsPattern(nameKeyword), luckyDrawEntered, completed);
