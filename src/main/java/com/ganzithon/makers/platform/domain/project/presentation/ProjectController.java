@@ -29,6 +29,11 @@ public class ProjectController {
     return ResponseEntity.ok(SuccessResponse.of(projectBoothQueryFacade.getProjectsGroupedByZone(principal.userId())));
   }
 
+  @GetMapping("/me")
+  public ResponseEntity<SuccessResponse<ProjectDetailResponse>> getMyProject(@AuthUser AuthPrincipal principal) {
+    return ResponseEntity.ok(SuccessResponse.of(projectBoothQueryFacade.getMyProject(principal.userId())));
+  }
+
   @GetMapping("/{projectId}")
   public ResponseEntity<SuccessResponse<ProjectDetailResponse>> getProjectDetail(@PathVariable Long projectId) {
     return ResponseEntity.ok(SuccessResponse.of(projectBoothQueryFacade.getProjectDetail(projectId)));

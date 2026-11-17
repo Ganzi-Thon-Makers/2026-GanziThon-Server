@@ -1,5 +1,7 @@
 package com.ganzithon.makers.platform.domain.project.application;
 
+import com.ganzithon.makers.common.exception.BusinessException;
+import com.ganzithon.makers.common.exception.ErrorCode;
 import com.ganzithon.makers.platform.domain.booth.application.BoothService;
 import com.ganzithon.makers.platform.domain.booth.domain.Booth;
 import com.ganzithon.makers.platform.domain.booth.domain.Zone;
@@ -68,6 +70,14 @@ public class ProjectBoothQueryFacade {
     Booth booth = boothService.findByProjectId(projectId);
     List<ProjectDetailResponse.PartMembers> members = getMembersGroupedByPart(projectId);
     return ProjectDetailResponse.of(project, booth, members);
+  }
+
+  public ProjectDetailResponse getMyProject(Long userId) {
+    Long projectId = userService.findById(userId).getProjectId();
+    if (projectId == null) {
+      throw new BusinessException(ErrorCode.PROJECT_NOT_FOUND);
+    }
+    return getProjectDetail(projectId);
   }
 
   private List<ProjectDetailResponse.PartMembers> getMembersGroupedByPart(Long projectId) {
