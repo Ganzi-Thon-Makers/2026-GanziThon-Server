@@ -53,7 +53,9 @@ public enum ErrorCode {
   QR_TOKEN_NOT_FOUND(HttpStatus.BAD_REQUEST, "유효하지 않은 QR 코드입니다. 부스에 표시된 QR 코드를 다시 확인해주세요."),
   QR_TOKEN_EXPIRED(HttpStatus.BAD_REQUEST, "만료된 QR 코드입니다. 부스 운영자에게 새 QR 발급을 요청해주세요."),
   STAMP_ALREADY_COLLECTED(HttpStatus.CONFLICT, "해당 부스의 스탬프는 이미 적립되어 추가 적립할 수 없습니다."),
+  STAMP_OWN_BOOTH(HttpStatus.BAD_REQUEST, "본인 팀 부스의 스탬프는 적립할 수 없습니다."),
   STAMP_COOLDOWN(HttpStatus.TOO_MANY_REQUESTS, "직전 스탬프 적립 후 5분이 지나야 다음 스탬프를 받을 수 있습니다."),
+  STAMP_PARTICIPANT_ONLY(HttpStatus.FORBIDDEN, "스탬프는 일반 참가자만 받을 수 있습니다. 팀 계정과 관리자 계정은 받을 수 없습니다."),
 
   INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류가 발생했습니다."),
 

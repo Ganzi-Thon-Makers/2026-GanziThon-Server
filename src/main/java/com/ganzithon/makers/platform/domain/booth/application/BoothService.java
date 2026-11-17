@@ -20,6 +20,11 @@ public class BoothService {
     return boothRepository.findAllByOrderByBoothNumberAsc();
   }
 
+  public Booth findById(Long boothId) {
+    return boothRepository.findById(boothId)
+        .orElseThrow(() -> new BusinessException(ErrorCode.BOOTH_NOT_FOUND));
+  }
+
   public Booth findByProjectId(Long projectId) {
     return boothRepository.findByProjectId(projectId)
         .orElseThrow(() -> new BusinessException(ErrorCode.BOOTH_NOT_FOUND));
