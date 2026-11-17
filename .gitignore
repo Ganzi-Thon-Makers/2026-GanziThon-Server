@@ -59,3 +59,5 @@ CODEX.md
 
 src/main/resources/application-local.yml
 .env
+.claude/settings.local.json
+.mcp.json
