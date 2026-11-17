@@ -28,10 +28,9 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-// TODO: 관리자 권한 체크 필요
 @Tag(name = "Backoffice - 프로젝트 관리")
 @RestController
-@RequestMapping("/api/backoffice/projects")
+@RequestMapping("/backoffice/api/v1/projects")
 @RequiredArgsConstructor
 public class BackofficeProjectController {
 
