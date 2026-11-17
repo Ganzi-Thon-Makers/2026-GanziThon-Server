@@ -16,6 +16,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
   boolean existsByLoginId(String loginId);
 
+  boolean existsByLoginIdAndIdNot(String loginId, Long id);
+
   // 조건이 null 이면 해당 조건은 적용하지 않음. namePattern 의 이스케이프 문자는 '!'
   @Query("""
       select u from User u

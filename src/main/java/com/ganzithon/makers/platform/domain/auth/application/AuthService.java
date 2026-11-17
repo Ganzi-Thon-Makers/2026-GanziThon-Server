@@ -72,6 +72,12 @@ public class AuthService {
         loginSessionRepository.deleteBySessionId(principal.sessionId());
     }
 
+    // 해당 회원의 모든 로그인 세션 삭제 (강제 로그아웃)
+    @Transactional
+    public void logoutAll(Long userId) {
+        loginSessionRepository.deleteByUserId(userId);
+    }
+
     private User authenticate(LoginRequest request) {
         User user = userRepository.findByLoginId(request.loginId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_CREDENTIALS));

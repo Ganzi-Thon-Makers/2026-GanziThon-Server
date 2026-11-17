@@ -50,6 +50,8 @@ public class SecurityConfig {
 
                         // 어드민
                         .requestMatchers(SecurityPaths.SUPER_ADMIN_ONLY).hasRole(Role.SUPER_ADMIN.name())
+                        .requestMatchers(HttpMethod.PUT, SecurityPaths.BACKOFFICE_USER).hasRole(Role.SUPER_ADMIN.name())
+                        .requestMatchers(HttpMethod.DELETE, SecurityPaths.BACKOFFICE_USER).hasRole(Role.SUPER_ADMIN.name())
                         .requestMatchers(SecurityPaths.BACKOFFICE_ALL).hasAnyRole(backofficeRoles)
 
                         // 사용자웹

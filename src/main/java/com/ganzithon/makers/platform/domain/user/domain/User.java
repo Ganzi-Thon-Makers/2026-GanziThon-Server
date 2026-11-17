@@ -115,6 +115,27 @@ public class User extends BaseEntity {
         return user;
     }
 
+    // 백오피스 참가자 수정용. 비밀번호, 소속 프로젝트, 럭키드로우 응모,수료 여부는 바꾸지 않음
+    public void update(
+        String loginId,
+        String name,
+        String phoneNumber,
+        String school,
+        Integer teamNumber,
+        Part part
+    ) {
+        this.loginId = loginId;
+        this.name = name;
+        this.phoneNumber = phoneNumber;
+        this.school = school;
+        this.teamNumber = teamNumber;
+        this.part = part;
+    }
+
+    public void changePassword(String encodedPassword) {
+        this.password = encodedPassword;
+    }
+
     public void assignToProject(Long projectId, Part part) {
         this.projectId = projectId;
         this.part = part;

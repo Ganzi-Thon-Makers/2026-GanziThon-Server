@@ -34,7 +34,12 @@ public class UserService {
     return userRepository.existsByLoginId(loginId);
   }
 
-  // login_id UNIQUE 위반을 호출한 쪽에서 바로 잡을 수 있도록 즉시 flush
+  // 수정 시 자기 자신은 제외하고 아이디 중복 확인
+  public boolean existsByLoginIdExcept(String loginId, Long userId) {
+    return userRepository.existsByLoginIdAndIdNot(loginId, userId);
+  }
+
+  // login_id UNIQUE 위반을 호출한 쪽에서 바로 잡을 수 있도록 즉시 flush (수정된 엔티티도 이걸로 반영)
   @Transactional
   public User save(User user) {
     return userRepository.saveAndFlush(user);
