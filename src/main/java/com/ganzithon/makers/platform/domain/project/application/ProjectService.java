@@ -21,6 +21,19 @@ public class ProjectService {
         .orElseThrow(() -> new BusinessException(ErrorCode.PROJECT_NOT_FOUND));
   }
 
+  public List<Project> findAll() {
+    return projectRepository.findAll();
+  }
+
+  public List<Project> searchByTitle(String keyword) {
+    return projectRepository.findAllByTitleContainingIgnoreCase(keyword);
+  }
+
+  @Transactional
+  public Project save(Project project) {
+    return projectRepository.save(project);
+  }
+
   public List<Project> findAllByIds(List<Long> projectIds) {
     return projectRepository.findAllById(projectIds);
   }

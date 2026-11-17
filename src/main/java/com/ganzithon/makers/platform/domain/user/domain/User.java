@@ -96,4 +96,13 @@ public class User extends BaseEntity {
         this.projectId = projectId;
         this.part = part;
     }
+
+    // 파트는 회원 정보라 그대로 두고 소속 프로젝트만 바꿈
+    public void joinProject(Long projectId) {
+        this.projectId = projectId;
+    }
+
+    public void leaveProject() {
+        this.projectId = null;
+    }
 }

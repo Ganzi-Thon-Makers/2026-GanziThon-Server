@@ -17,4 +17,8 @@ public class UserService {
   public List<User> findAllByProjectId(Long projectId) {
     return userRepository.findAllByProjectId(projectId);
   }
+
+  public List<User> findAllByIds(List<Long> userIds) {
+    return userRepository.findAllById(userIds);
+  }
 }
