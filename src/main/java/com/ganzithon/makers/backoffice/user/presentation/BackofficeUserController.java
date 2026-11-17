@@ -1,6 +1,7 @@
 package com.ganzithon.makers.backoffice.user.presentation;
 
 import com.ganzithon.makers.backoffice.user.application.BackofficeUserService;
+import com.ganzithon.makers.backoffice.user.presentation.dto.UserDetailResponse;
 import com.ganzithon.makers.backoffice.user.presentation.dto.UserListResponse;
 import com.ganzithon.makers.common.dto.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,6 +11,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,5 +39,13 @@ public class BackofficeUserController {
   ) {
     return ResponseEntity.ok(SuccessResponse.of(
         backofficeUserService.getUsers(keyword, luckyDrawEntered, completed)));
+  }
+
+  @Operation(
+      summary = "참가자 상세 조회",
+      description = "비밀번호는 응답하지 않습니다. (수정에서 재설정만 가능) 참가자가 아닌 계정은 404입니다.")
+  @GetMapping("/{userId}")
+  public ResponseEntity<SuccessResponse<UserDetailResponse>> getUser(@PathVariable Long userId) {
+    return ResponseEntity.ok(SuccessResponse.of(backofficeUserService.getUser(userId)));
   }
 }
