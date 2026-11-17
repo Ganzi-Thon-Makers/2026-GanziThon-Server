@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class UserService {
 
-    private final UserRepository userRepository;
+  private final UserRepository userRepository;
 
   public MyPageResponse getMyPage(Long userId) {
         User user = findUserById(userId);
@@ -43,18 +43,24 @@ public class UserService {
                 );
     }
 
-    public List<User> findAllByProjectId(Long projectId) {
-        return userRepository.findAllByProjectId(projectId);
-    }
+  public List<User> findAllByProjectId(Long projectId) {
+    return userRepository.findAllByProjectId(projectId);
+  }
 
-    public List<User> findAllByIds(List<Long> userIds) {
-        return userRepository.findAllById(userIds);
-    }
-    //Team 배제
-    private User findUserById(Long userId) {
-        return userRepository.findByIdAndRoleNot(userId, Role.TEAM)
-                .orElseThrow(() ->
-                        new BusinessException(ErrorCode.USER_NOT_FOUND)
-                );
-    }
+  public List<User> findAllByIds(List<Long> userIds) {
+      return userRepository.findAllById(userIds);
+  }
+
+  //Team 배제
+  private User findUserById(Long userId) {
+      return userRepository.findByIdAndRoleNot(userId, Role.TEAM)
+              .orElseThrow(() ->
+                      new BusinessException(ErrorCode.USER_NOT_FOUND)
+              );
+  }
+
+  public User getById(Long userId) {
+    return userRepository.findById(userId)
+        .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+  }
 }
