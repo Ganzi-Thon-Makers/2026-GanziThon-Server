@@ -3,6 +3,7 @@ package com.ganzithon.makers.platform.domain.timetable.infrastructure;
 import com.ganzithon.makers.platform.domain.timetable.domain.Timetable;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,6 +12,8 @@ public interface TimetableRepository extends JpaRepository<Timetable, Long> {
 
     // 순서가 항상 같도록 시작 → 종료 → id 순으로 정렬
     List<Timetable> findAllByOrderByStartTimeAscEndTimeAscIdAsc();
+
+    Optional<Timetable> findByVoteTrue();
 
     boolean existsByVoteTrue();
 

@@ -81,17 +81,45 @@ public class Timetable extends BaseEntity {
         String title,
         String description,
         LocalDateTime startTime,
-        LocalDateTime endTime
+        LocalDateTime endTime,
+        LocalDateTime now
     ) {
         validateTimeRange(startTime, endTime);
+        validateVoteTimeEditable(startTime, endTime, now);
         this.title = title;
         this.description = description;
         this.startTime = startTime;
         this.endTime = endTime;
     }
 
+    // 투표 시간만 수정 (제목, 내용은 유지)
+    public void changeVoteTime(LocalDateTime startTime, LocalDateTime endTime, LocalDateTime now) {
+        requireVote();
+        update(this.title, this.description, startTime, endTime, now);
+    }
+
     public boolean isVote() {
         return Boolean.TRUE.equals(vote);
+    }
+
+    // 투표 상태는 저장하지 않고 현재 시각 기준으로 계산한다
+    public VoteStatus voteStatusAt(LocalDateTime now) {
+        requireVote();
+        if (now.isBefore(startTime)) {
+            return VoteStatus.NOT_STARTED;
+        }
+        if (!now.isBefore(endTime)) {
+            return VoteStatus.ENDED;
+        }
+        return paused ? VoteStatus.PAUSED : VoteStatus.IN_PROGRESS;
+    }
+
+    // 투표 진행 중에는 시간을 바꿀 수 없다 (일시중지 후 수정 가능, 제목/내용만 바꾸는 것은 허용)
+    private void validateVoteTimeEditable(LocalDateTime startTime, LocalDateTime endTime, LocalDateTime now) {
+        boolean timeChanged = !startTime.equals(this.startTime) || !endTime.equals(this.endTime);
+        if (isVote() && timeChanged && voteStatusAt(now) == VoteStatus.IN_PROGRESS) {
+            throw new BusinessException(ErrorCode.VOTE_IN_PROGRESS);
+        }
     }
 
     // 투표 일시중지 (이미 중지 상태여도 그대로 둔다)
@@ -108,7 +136,7 @@ public class Timetable extends BaseEntity {
 
     private void requireVote() {
         if (!isVote()) {
-            throw new IllegalStateException("투표 일정만 일시중지/재개할 수 있습니다.");
+            throw new IllegalStateException("투표 일정에서만 사용할 수 있습니다.");
         }
     }
 

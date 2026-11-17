@@ -6,6 +6,8 @@ import com.ganzithon.makers.common.exception.BusinessException;
 import com.ganzithon.makers.common.exception.ErrorCode;
 import com.ganzithon.makers.platform.domain.timetable.domain.Timetable;
 import com.ganzithon.makers.platform.domain.timetable.infrastructure.TimetableRepository;
+import java.time.Clock;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -19,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class BackofficeTimetableService {
 
   private final TimetableRepository timetableRepository;
+  private final Clock clock;
 
   public List<Timetable> findAllOrdered() {
     return timetableRepository.findAllByOrderByStartTimeAscEndTimeAscIdAsc();
@@ -29,7 +32,11 @@ public class BackofficeTimetableService {
         .orElseThrow(() -> new BusinessException(ErrorCode.TIMETABLE_NOT_FOUND));
   }
 
-  // TODO: 투표 관리 기능 구현 시 VOTE 일정 조회 메서드 추가
+  // 투표 시간 조회용
+  public Timetable getVoteTimetable() {
+    return timetableRepository.findByVoteTrue()
+        .orElseThrow(() -> new BusinessException(ErrorCode.VOTE_TIMETABLE_NOT_FOUND));
+  }
 
   @Transactional
   public Timetable create(TimetableCreateRequest request) {
@@ -73,11 +80,21 @@ public class BackofficeTimetableService {
         request.title(),
         request.description(),
         request.startTime(),
-        request.endTime()
+        request.endTime(),
+        LocalDateTime.now(clock)
     );
     // 겹침 조회 전에 수정 내용이 먼저 반영(flush)되더라도, 예외 발생 시 트랜잭션이 롤백된다
     validateNotOverlapping(timetable, timetableId);
     return timetable;
+  }
+
+  // 투표 시간 수정 (투표 관리에서 사용). 타임테이블 수정과 같은 검사(시간 순서, 진행 중 수정 불가, 겹침)를 거친다
+  @Transactional
+  public Timetable changeVoteTime(LocalDateTime startTime, LocalDateTime endTime) {
+    Timetable vote = getVoteTimetable();
+    vote.changeVoteTime(startTime, endTime, LocalDateTime.now(clock));
+    validateNotOverlapping(vote, vote.getId());
+    return vote;
   }
 
   @Transactional
