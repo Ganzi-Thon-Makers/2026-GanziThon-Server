@@ -28,4 +28,9 @@ public class UserService {
   public List<User> findAllByIds(List<Long> userIds) {
     return userRepository.findAllById(userIds);
   }
+
+  @Transactional
+  public void clearProject(Long projectId) {
+    userRepository.clearProject(projectId);
+  }
 }

@@ -7,6 +7,7 @@ import com.ganzithon.makers.backoffice.project.presentation.dto.ProjectListRespo
 import com.ganzithon.makers.backoffice.project.presentation.dto.ProjectUpdateRequest;
 import com.ganzithon.makers.common.exception.BusinessException;
 import com.ganzithon.makers.common.exception.ErrorCode;
+import com.ganzithon.makers.platform.domain.booth.application.BoothService;
 import com.ganzithon.makers.platform.domain.project.application.ProjectService;
 import com.ganzithon.makers.platform.domain.project.domain.Project;
 import com.ganzithon.makers.platform.domain.user.application.UserService;
@@ -27,7 +28,7 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
 
-/** 프로젝트 목록 조회/검색, 상세 조회, 등록, 수정 */
+/** 프로젝트 목록 조회/검색, 상세 조회, 등록, 수정, 삭제 */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -39,6 +40,7 @@ public class BackofficeProjectService {
   private final ProjectService projectService;
   private final VoteService voteService;
   private final UserService userService;
+  private final BoothService boothService;
   private final ImageStorage imageStorage;
 
   // keyword 가 비어 있으면 전체 조회, 있으면 프로젝트명 부분 일치 검색
@@ -124,6 +126,17 @@ public class BackofficeProjectService {
 
     long voteCount = voteService.countByProjectId(projectId);
     return ProjectDetailResponse.of(project, voteCount, toMembers(users.values()));
+  }
+
+  // 팀원·부스는 연결만 해제하고, 받은 투표는 삭제. 대표 이미지는 커밋 후 삭제 (롤백되면 유지)
+  @Transactional
+  public void delete(Long projectId) {
+    Project project = projectService.findById(projectId);
+    userService.clearProject(projectId);
+    boothService.clearProject(projectId);
+    voteService.deleteAllByProjectId(projectId);
+    projectService.delete(project);
+    deleteImageOnCommit(project.getThumbnailUrl());
   }
 
   // 요청한 팀원(userId)을 조회. 중복이면 400, 없는 회원이 있으면 404

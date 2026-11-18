@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -88,5 +89,15 @@ public class BackofficeProjectController {
       @RequestPart(value = "thumbnail", required = false) MultipartFile thumbnail
   ) {
     return ResponseEntity.ok(SuccessResponse.of(backofficeProjectService.update(projectId, request, thumbnail)));
+  }
+
+  @Operation(
+      summary = "프로젝트 삭제",
+      description = "되돌릴 수 없습니다. 팀원과 부스는 연결만 해제되고, 프로젝트가 받은 투표는 삭제됩니다. "
+          + "(투표했던 참가자는 다시 투표할 수 있습니다)")
+  @DeleteMapping("/{projectId}")
+  public ResponseEntity<SuccessResponse<Void>> delete(@PathVariable Long projectId) {
+    backofficeProjectService.delete(projectId);
+    return ResponseEntity.ok(SuccessResponse.of("삭제되었습니다."));
   }
 }

@@ -34,6 +34,11 @@ public class ProjectService {
     return projectRepository.save(project);
   }
 
+  @Transactional
+  public void delete(Project project) {
+    projectRepository.delete(project);
+  }
+
   public List<Project> findAllByIds(List<Long> projectIds) {
     return projectRepository.findAllById(projectIds);
   }
