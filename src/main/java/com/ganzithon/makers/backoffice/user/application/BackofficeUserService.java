@@ -7,6 +7,7 @@ import com.ganzithon.makers.backoffice.user.presentation.dto.UserUpdateRequest;
 import com.ganzithon.makers.common.exception.BusinessException;
 import com.ganzithon.makers.common.exception.ErrorCode;
 import com.ganzithon.makers.platform.domain.auth.application.AuthService;
+import com.ganzithon.makers.platform.domain.stamp.application.StampService;
 import com.ganzithon.makers.platform.domain.user.application.UserService;
 import com.ganzithon.makers.platform.domain.user.domain.Role;
 import com.ganzithon.makers.platform.domain.user.domain.User;
@@ -28,6 +29,7 @@ public class BackofficeUserService {
   private final PasswordEncoder passwordEncoder;
   private final AuthService authService;
   private final VoteService voteService;
+  private final StampService stampService;
 
   // 관리 대상은 참가자만. 조건이 null 이면 해당 조건은 적용하지 않음
   public List<UserListResponse> getUsers(String keyword, Boolean luckyDrawEntered, Boolean completed) {
@@ -97,13 +99,13 @@ public class BackofficeUserService {
     return UserDetailResponse.of(user);
   }
 
-  // 물리 삭제. 회원의 투표, 로그인 세션도 함께 삭제 (투표했던 프로젝트의 득표수가 줄어듦)
+  // 물리 삭제. 회원의 투표, 스탬프, 로그인 세션도 함께 삭제 (투표했던 프로젝트의 득표수가 줄어듦)
   // 프로젝트 팀원은 users.project_id 로만 연결되어 있어서 따로 처리할 것이 없음
   @Transactional
   public void delete(Long userId) {
     User user = getParticipant(userId);
     voteService.deleteAllByUserId(userId);
-    // TODO: 스탬프 삭제 (feat/stamp-qr-collection 머지 후 StampRepository 에 deleteByUserId 추가해서 호출)
+    stampService.deleteAllByUserId(userId);
     authService.logoutAll(userId);
     userService.delete(user);
   }

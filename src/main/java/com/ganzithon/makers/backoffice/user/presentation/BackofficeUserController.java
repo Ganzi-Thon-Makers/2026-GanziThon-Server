@@ -85,7 +85,7 @@ public class BackofficeUserController {
 
   @Operation(
       summary = "참가자 삭제 (SUPER_ADMIN 전용)",
-      description = "되돌릴 수 없습니다. 참가자의 투표도 함께 삭제되어, 투표했던 프로젝트의 득표수가 줄어듭니다.")
+      description = "되돌릴 수 없습니다. 참가자의 투표·스탬프도 함께 삭제되어, 투표했던 프로젝트의 득표수가 줄어듭니다.")
   @DeleteMapping("/{userId}")
   public ResponseEntity<SuccessResponse<Void>> delete(@PathVariable Long userId) {
     backofficeUserService.delete(userId);
