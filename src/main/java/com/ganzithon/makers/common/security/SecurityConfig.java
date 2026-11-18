@@ -54,6 +54,7 @@ public class SecurityConfig {
 
                         // 사용자웹
                         .requestMatchers(SecurityPaths.TEAM_ONLY).hasRole(Role.TEAM.name())
+                        .requestMatchers(SecurityPaths.AUTHENTICATED).authenticated()
 
                         // 그 외는 로그인한 모든 role
                         .anyRequest().authenticated())
