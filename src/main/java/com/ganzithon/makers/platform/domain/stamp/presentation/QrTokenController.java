@@ -14,10 +14,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/qr-tokens")
 @RequiredArgsConstructor
-public class QrTokenController {
+public class QrTokenController implements QrTokenApi {
 
   private final StampFacade stampFacade;
 
+  @Override
   @PostMapping
   public ResponseEntity<SuccessResponse<QrTokenResponse>> issue(
       @AuthUser AuthPrincipal principal) {

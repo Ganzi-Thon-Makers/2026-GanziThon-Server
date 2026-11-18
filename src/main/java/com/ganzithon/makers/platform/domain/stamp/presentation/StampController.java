@@ -15,10 +15,11 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/stamps")
 @RequiredArgsConstructor
-public class StampController {
+public class StampController implements StampApi {
 
   private final StampFacade stampFacade;
 
+  @Override
   @PostMapping
   public ResponseEntity<SuccessResponse<StampCollectResponse>> collect(
       @AuthUser AuthPrincipal principal,
@@ -26,6 +27,7 @@ public class StampController {
     return ResponseEntity.ok(SuccessResponse.of(stampFacade.collect(principal.userId(), requestBody.token())));
   }
 
+  @Override
   @GetMapping
   public ResponseEntity<SuccessResponse<StampBoardResponse>> getBoard(
       @AuthUser AuthPrincipal principal) {
