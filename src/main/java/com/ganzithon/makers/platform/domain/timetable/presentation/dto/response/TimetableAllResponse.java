@@ -10,6 +10,7 @@ public record TimetableAllResponse(
     public record Timetable(
             Long id,
             String title,
+            String description,
             String startTime,
             String endTime
     ) {
@@ -17,6 +18,7 @@ public record TimetableAllResponse(
             return new Timetable(
                     info.id(),
                     info.title(),
+                    info.description(),
                     info.startTime(),
                     info.endTime()
             );

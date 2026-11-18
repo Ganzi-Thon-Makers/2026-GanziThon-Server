@@ -17,6 +17,9 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class TimetableServiceTest {
 
@@ -47,9 +50,25 @@ class TimetableServiceTest {
     TimetableAllResponse response = timetableService.getAllTimetables();
 
     assertThat(response.timetables()).hasSize(2);
+    assertThat(response.timetables()).extracting(TimetableAllResponse.Timetable::description)
+        .containsExactly("행사 시작", "본격 개발");
     assertThat(response.timetables().get(0).title()).isEqualTo("개회식");
     assertThat(response.timetables().get(0).startTime()).isEqualTo("10:00");
     assertThat(response.timetables().get(0).endTime()).isEqualTo("10:30");
+  }
+
+  @ParameterizedTest
+  @NullAndEmptySource
+  @ValueSource(strings = {"첫 번째 안내\n두 번째 안내"})
+  @DisplayName("전체 조회는 null, 빈 문자열, 여러 줄 설명을 그대로 반환한다")
+  void preservesDescriptionInAllTimetables(String description) {
+    when(timetableRepository.findAllByOrderByStartTimeAsc()).thenReturn(List.of(
+        timetable("개회식", description, 10, 0, 10, 30)));
+
+    TimetableAllResponse response = timetableService.getAllTimetables();
+
+    assertThat(response.timetables()).hasSize(1);
+    assertThat(response.timetables().get(0).description()).isEqualTo(description);
   }
 
   @Test

@@ -6,6 +6,7 @@ import java.time.format.DateTimeFormatter;
 public record TimetableInfo(
         Long id,
         String title,
+        String description,
         String startTime,
         String endTime
 ) {
@@ -16,6 +17,7 @@ public record TimetableInfo(
         return new TimetableInfo(
                 timetable.getId(),
                 timetable.getTitle(),
+                timetable.getDescription(),
                 timetable.getStartTime().format(TIME_FORMATTER),
                 timetable.getEndTime().format(TIME_FORMATTER)
         );

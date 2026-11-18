@@ -105,4 +105,8 @@ public class User extends BaseEntity {
     public void leaveProject() {
         this.projectId = null;
     }
+
+    public void enterLuckyDraw() {
+        this.luckyDrawEntered = true;
+    }
 }
