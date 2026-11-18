@@ -11,15 +11,17 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/timetable")
 @RequiredArgsConstructor
-public class TimetableController {
+public class TimetableController implements TimetableApi {
 
     private final TimetableService timetableService;
 
+    @Override
     @GetMapping
     public ResponseEntity<SuccessResponse<TimetableAllResponse>> getAllTimeTables(){
         return ResponseEntity.ok(SuccessResponse.of(timetableService.getAllTimetables()));
     }
 
+    @Override
     @GetMapping("/{timetableId}")
     public ResponseEntity<SuccessResponse<TimetableDetailResponse>> getTimeTable(
             @PathVariable Long timetableId
