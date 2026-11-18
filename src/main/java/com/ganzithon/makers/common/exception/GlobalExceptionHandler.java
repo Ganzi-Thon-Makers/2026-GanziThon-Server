@@ -29,7 +29,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     return ResponseEntity
         .status(e.getErrorCode().getStatus())
-        .body(ErrorResponse.of(e.getMessage()));
+        .body(ErrorResponse.of(e.getErrorCode(), e.getMessage()));
   }
 
   @Override
@@ -53,6 +53,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     return ResponseEntity
         .status(ErrorCode.INVALID_INPUT.getStatus())
         .body(ErrorResponse.of(
+            ErrorCode.INVALID_INPUT,
             ErrorCode.INVALID_INPUT.getMessage(),
             errors
         ));
@@ -73,7 +74,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     return ResponseEntity
         .status(ErrorCode.MAX_UPLOAD_SIZE_EXCEEDED.getStatus())
-        .body(ErrorResponse.of(ErrorCode.MAX_UPLOAD_SIZE_EXCEEDED.getMessage()));
+        .body(ErrorResponse.of(ErrorCode.MAX_UPLOAD_SIZE_EXCEEDED));
   }
 
   @Override
@@ -93,18 +94,18 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     return ResponseEntity
         .status(status)
-        .body(ErrorResponse.of(messageFor(status)));
+        .body(ErrorResponse.of(errorCodeFor(status), status.value()));
   }
 
-  private String messageFor(HttpStatusCode status) {
+  private ErrorCode errorCodeFor(HttpStatusCode status) {
     HttpStatus resolved = HttpStatus.resolve(status.value());
     return switch (resolved != null ? resolved : HttpStatus.INTERNAL_SERVER_ERROR) {
-      case BAD_REQUEST -> ErrorCode.INVALID_INPUT.getMessage();
-      case UNAUTHORIZED -> ErrorCode.UNAUTHORIZED.getMessage();
-      case FORBIDDEN -> ErrorCode.FORBIDDEN.getMessage();
-      case NOT_FOUND -> ErrorCode.NOT_FOUND.getMessage();
-      case METHOD_NOT_ALLOWED -> ErrorCode.METHOD_NOT_ALLOWED.getMessage();
-      default -> "요청을 처리할 수 없습니다.";
+      case BAD_REQUEST -> ErrorCode.INVALID_INPUT;
+      case UNAUTHORIZED -> ErrorCode.UNAUTHORIZED;
+      case FORBIDDEN -> ErrorCode.FORBIDDEN;
+      case NOT_FOUND -> ErrorCode.NOT_FOUND;
+      case METHOD_NOT_ALLOWED -> ErrorCode.METHOD_NOT_ALLOWED;
+      default -> ErrorCode.REQUEST_PROCESS_FAILED;
     };
   }
 
@@ -114,8 +115,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     return ResponseEntity
         .status(ErrorCode.INTERNAL_SERVER_ERROR.getStatus())
-        .body(ErrorResponse.of(
-            ErrorCode.INTERNAL_SERVER_ERROR.getMessage()
-        ));
+        .body(ErrorResponse.of(ErrorCode.INTERNAL_SERVER_ERROR));
   }
 }
