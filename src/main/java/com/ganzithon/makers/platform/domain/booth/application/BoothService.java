@@ -30,6 +30,12 @@ public class BoothService {
         .orElseThrow(() -> new BusinessException(ErrorCode.BOOTH_NOT_FOUND));
   }
 
+  // 프로젝트 삭제 시 부스는 유지하고 연결만 해제
+  @Transactional
+  public void clearProject(Long projectId) {
+    boothRepository.clearProject(projectId);
+  }
+
   public List<Booth> findAllByIds(List<Long> boothIds) {
     return boothRepository.findAllById(boothIds);
   }

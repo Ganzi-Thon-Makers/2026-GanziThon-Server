@@ -3,7 +3,9 @@ package com.ganzithon.makers.platform.domain.vote.infrastructure;
 import com.ganzithon.makers.platform.domain.vote.domain.Vote;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface VoteRepository extends JpaRepository<Vote, Long> {
 
@@ -20,4 +22,8 @@ public interface VoteRepository extends JpaRepository<Vote, Long> {
   boolean existsByUserId(Long userId);
          
   List<Vote> findAllByUserId(Long userId);
+
+  @Modifying
+  @Query("delete from Vote v where v.projectId = :projectId")
+  void deleteAllByProjectId(@Param("projectId") Long projectId);
 }
