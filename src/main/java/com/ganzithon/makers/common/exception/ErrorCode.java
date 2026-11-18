@@ -34,6 +34,11 @@ public enum ErrorCode {
   INVALID_PROJECT_MEMBER_ROLE(HttpStatus.BAD_REQUEST, "참가자 또는 팀 계정만 팀원으로 등록할 수 있습니다."),
   MULTIPLE_TEAM_ACCOUNTS(HttpStatus.BAD_REQUEST, "팀 계정은 프로젝트당 하나만 등록할 수 있습니다."),
 
+  // User
+  DUPLICATE_LOGIN_ID(HttpStatus.CONFLICT, "이미 사용 중인 아이디입니다."),
+  INVALID_USER_ROLE(HttpStatus.BAD_REQUEST, "SUPER_ADMIN 은 사용할 수 없는 역할입니다."),
+  MISSING_REQUIRED_USER_FIELD(HttpStatus.BAD_REQUEST, "역할에 필요한 항목이 비어 있습니다."),
+
   // Booth
   BOOTH_NOT_FOUND(HttpStatus.NOT_FOUND, "부스를 찾을 수 없습니다."),
 

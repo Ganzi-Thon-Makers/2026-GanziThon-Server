@@ -53,4 +53,10 @@ public class VoteService {
         .map(Vote::getProjectId)
         .collect(Collectors.toSet());
   }
+
+  // 회원 삭제 시 그 회원의 투표도 삭제 (투표했던 프로젝트의 득표수가 줄어듦)
+  @Transactional
+  public void deleteAllByUserId(Long userId) {
+    voteRepository.deleteAllByUserId(userId);
+  }
 }

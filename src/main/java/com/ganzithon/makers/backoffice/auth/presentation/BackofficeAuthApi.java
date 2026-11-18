@@ -1,4 +1,4 @@
-package com.ganzithon.makers.platform.domain.auth.presentation;
+package com.ganzithon.makers.backoffice.auth.presentation;
 
 import com.ganzithon.makers.common.dto.SuccessResponse;
 import com.ganzithon.makers.common.exception.ErrorCode;

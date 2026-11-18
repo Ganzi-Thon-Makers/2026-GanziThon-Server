@@ -4,6 +4,9 @@ import com.ganzithon.makers.platform.domain.stamp.domain.Stamp;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface StampRepository extends JpaRepository<Stamp, Long> {
 
@@ -14,4 +17,8 @@ public interface StampRepository extends JpaRepository<Stamp, Long> {
   long countByUserId(Long userId);
 
   Optional<Stamp> findTopByUserIdOrderByCreatedAtDesc(Long userId);
+
+  @Modifying
+  @Query("delete from Stamp s where s.userId = :userId")
+  void deleteAllByUserId(@Param("userId") Long userId);
 }

@@ -19,6 +19,12 @@ public class StampService {
   private final StampRepository stampRepository;
   private final StampProperties stampProperties;
 
+  // 회원 삭제 시 그 회원의 스탬프도 삭제
+  @Transactional
+  public void deleteAllByUserId(Long userId) {
+    stampRepository.deleteAllByUserId(userId);
+  }
+
   @Transactional
   public Stamp collect(Long userId, Long boothId) {
     if (stampRepository.existsByUserIdAndBoothId(userId, boothId)) {
