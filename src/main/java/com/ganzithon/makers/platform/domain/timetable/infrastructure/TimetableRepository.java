@@ -30,4 +30,6 @@ public interface TimetableRepository extends JpaRepository<Timetable, Long> {
         @Param("endTime") LocalDateTime endTime,
         @Param("excludeId") Long excludeId
     );
+
+    List<Timetable> findAllByOrderByStartTimeAsc();
 }

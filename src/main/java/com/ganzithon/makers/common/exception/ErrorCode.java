@@ -14,6 +14,7 @@ public enum ErrorCode {
   NOT_FOUND(HttpStatus.NOT_FOUND, "요청한 리소스를 찾을 수 없습니다."),
   METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "지원하지 않는 요청 메서드입니다."),
   MAX_UPLOAD_SIZE_EXCEEDED(HttpStatus.CONTENT_TOO_LARGE, "업로드 가능한 최대 용량을 초과했습니다."),
+  REQUEST_PROCESS_FAILED(HttpStatus.BAD_REQUEST, "요청을 처리할 수 없습니다."),
 
   // Image
   EMPTY_IMAGE_FILE(HttpStatus.BAD_REQUEST, "이미지 파일이 비어 있습니다."),
@@ -44,6 +45,12 @@ public enum ErrorCode {
   VOTE_TIMETABLE_NOT_DELETABLE(HttpStatus.CONFLICT, "투표 일정은 삭제할 수 없습니다."),
   VOTE_TIMETABLE_NOT_FOUND(HttpStatus.NOT_FOUND, "투표 일정이 등록되지 않았습니다."),
   VOTE_IN_PROGRESS(HttpStatus.CONFLICT, "투표가 진행 중이라 시간을 수정할 수 없습니다. 일시중지 후 수정해 주세요."),
+
+  // Vote
+  VOTE_PARTICIPANT_ONLY(HttpStatus.FORBIDDEN, "투표는 참가자만 할 수 있습니다."),
+  VOTE_NOT_IN_PROGRESS(HttpStatus.CONFLICT, "현재 투표 시간이 아닙니다."),
+  VOTE_ALREADY_CAST(HttpStatus.CONFLICT, "이미 투표를 완료했습니다."),
+  VOTE_OWN_PROJECT(HttpStatus.BAD_REQUEST, "본인 팀 프로젝트에는 투표할 수 없습니다."),
 
   INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류가 발생했습니다."),
 
