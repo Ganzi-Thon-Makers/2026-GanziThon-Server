@@ -92,13 +92,14 @@ public class User extends BaseEntity {
         );
     }
 
-    // 백오피스 참가자 등록용. 럭키드로우 응모·수료 여부는 false 로 시작
-    public static User createParticipant(
+    // 백오피스 계정 등록용 (PARTICIPANT, TEAM, ADMIN). 럭키드로우 응모·수료 여부는 false 로 시작
+    public static User createByAdmin(
         String loginId,
         String encodedPassword,
         String name,
         String phoneNumber,
         String school,
+        Role role,
         Integer teamNumber,
         Part part
     ) {
@@ -108,14 +109,14 @@ public class User extends BaseEntity {
             name,
             phoneNumber,
             school,
-            Role.PARTICIPANT,
+            role,
             teamNumber
         );
         user.part = part;
         return user;
     }
 
-    // 백오피스 참가자 수정용. 비밀번호, 소속 프로젝트, 럭키드로우 응모,수료 여부는 바꾸지 않음
+    // 백오피스 계정 수정용. role, 비밀번호, 소속 프로젝트, 럭키드로우 응모,수료 여부는 바꾸지 않음
     public void update(
         String loginId,
         String name,

@@ -31,6 +31,18 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
   boolean existsByLoginIdAndIdNot(String loginId, Long id);
 
+  // 여러 role 의 회원을 이름 부분 일치로 검색 (namePattern 이 null 이면 전체). 이스케이프 문자는 '!'
+  @Query("""
+      select u from User u
+      where u.role in :roles
+        and (:namePattern is null or u.name like :namePattern escape '!')
+      order by u.name asc, u.id asc
+      """)
+  List<User> searchByRoles(
+      @Param("roles") List<Role> roles,
+      @Param("namePattern") String namePattern
+  );
+
   // 조건이 null 이면 해당 조건은 적용하지 않음. namePattern 의 이스케이프 문자는 '!'
   @Query("""
       select u from User u

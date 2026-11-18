@@ -1,11 +1,13 @@
 package com.ganzithon.makers.backoffice.user.presentation.dto;
 
 import com.ganzithon.makers.platform.domain.user.domain.Part;
+import com.ganzithon.makers.platform.domain.user.domain.Role;
 import com.ganzithon.makers.platform.domain.user.domain.User;
 
 public record UserDetailResponse(
     Long id,
     String loginId,
+    Role role,
     String name,
     String school,
     String phoneNumber,
@@ -19,6 +21,7 @@ public record UserDetailResponse(
     return new UserDetailResponse(
         user.getId(),
         user.getLoginId(),
+        user.getRole(),
         user.getName(),
         user.getSchool(),
         user.getPhoneNumber(),
