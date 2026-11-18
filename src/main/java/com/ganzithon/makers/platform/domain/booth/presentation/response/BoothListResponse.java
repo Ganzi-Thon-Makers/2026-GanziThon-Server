@@ -4,6 +4,7 @@ import com.ganzithon.makers.platform.domain.booth.application.dto.BoothInfo;
 
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 public record BoothListResponse(
@@ -16,6 +17,7 @@ public record BoothListResponse(
                 boothInfos.stream()
                         .collect(Collectors.groupingBy(
                                 BoothInfo::zone,
+                                TreeMap::new,
                                 Collectors.mapping(
                                         BoothResponse::from,
                                         Collectors.toList()
