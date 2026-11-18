@@ -66,9 +66,12 @@ public class BackofficeProjectService {
 
   @Transactional
   public ProjectDetailResponse create(ProjectCreateRequest request, MultipartFile thumbnail) {
-    // 팀원 검증을 먼저 끝내서, 검증 실패 시 이미지가 업로드되지 않도록 함
+    // 팀원·팀 번호 검증을 먼저 끝내서, 검증 실패 시 이미지가 업로드되지 않도록 함
     Map<Long, User> users = findMembers(request.memberIdsOrEmpty());
     users.values().forEach(user -> validateAssignable(user, null));
+    if (projectService.existsByTeamNumber(request.teamNumber())) {
+      throw new BusinessException(ErrorCode.DUPLICATE_TEAM_NUMBER);
+    }
 
     String thumbnailUrl = imageStorage.upload(thumbnail, THUMBNAIL_DIRECTORY);
     deleteImageOnRollback(thumbnailUrl);
@@ -76,6 +79,7 @@ public class BackofficeProjectService {
     Project project = projectService.save(Project.create(
         request.title(),
         request.teamName(),
+        request.teamNumber(),
         request.summary(),
         request.description(),
         blankToNull(request.serviceUrl()),
@@ -94,9 +98,12 @@ public class BackofficeProjectService {
   public ProjectDetailResponse update(Long projectId, ProjectUpdateRequest request, MultipartFile thumbnail) {
     Project project = projectService.findById(projectId);
 
-    // 팀원 검증을 먼저 끝내서, 검증 실패 시 이미지가 업로드되지 않도록 함
+    // 팀원·팀 번호 검증을 먼저 끝내서, 검증 실패 시 이미지가 업로드되지 않도록 함
     Map<Long, User> users = findMembers(request.memberIdsOrEmpty());
     users.values().forEach(user -> validateAssignable(user, projectId));
+    if (projectService.existsByTeamNumberExcept(request.teamNumber(), projectId)) {
+      throw new BusinessException(ErrorCode.DUPLICATE_TEAM_NUMBER);
+    }
 
     if (thumbnail != null && !thumbnail.isEmpty()) {
       String oldThumbnailUrl = project.getThumbnailUrl();
@@ -109,6 +116,7 @@ public class BackofficeProjectService {
     project.update(
         request.title(),
         request.teamName(),
+        request.teamNumber(),
         request.summary(),
         request.description(),
         blankToNull(request.serviceUrl()),

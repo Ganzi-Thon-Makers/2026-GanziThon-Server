@@ -2,6 +2,8 @@ package com.ganzithon.makers.backoffice.project.presentation.dto;
 
 import com.ganzithon.makers.platform.domain.project.domain.Platform;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -19,6 +21,13 @@ public record ProjectUpdateRequest(
     @Schema(example = "댕댕이지키미")
     @NotBlank @Size(max = 100)
     String teamName,
+
+    // 행사 팀은 1~30팀. 다른 프로젝트와 중복 불가
+    @Schema(description = "1~30, 다른 프로젝트와 중복 불가", example = "1")
+    @NotNull
+    @Min(value = 1, message = "팀 번호는 1~30 사이여야 합니다.")
+    @Max(value = 30, message = "팀 번호는 1~30 사이여야 합니다.")
+    Integer teamNumber,
 
     @Schema(description = "팀원(회원 id) 최종 목록. 빠진 회원은 프로젝트에서 연결 해제됨. 파트는 회원 정보의 파트를 사용 (비어 있어도 됨)", example = "[1, 2]")
     List<@NotNull Long> memberIds,

@@ -29,6 +29,15 @@ public class ProjectService {
     return projectRepository.findAllByTitleContainingIgnoreCase(keyword);
   }
 
+  public boolean existsByTeamNumber(Integer teamNumber) {
+    return projectRepository.existsByTeamNumber(teamNumber);
+  }
+
+  // 수정 시 자기 자신은 제외하고 팀 번호 중복 확인
+  public boolean existsByTeamNumberExcept(Integer teamNumber, Long projectId) {
+    return projectRepository.existsByTeamNumberAndIdNot(teamNumber, projectId);
+  }
+
   @Transactional
   public Project save(Project project) {
     return projectRepository.save(project);

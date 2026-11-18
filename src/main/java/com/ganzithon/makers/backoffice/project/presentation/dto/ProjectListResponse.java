@@ -7,7 +7,8 @@ public record ProjectListResponse(
     String title,
     String serviceUrl,
     long voteCount,
-    String teamName
+    String teamName,
+    Integer teamNumber
 ) {
 
   public static ProjectListResponse of(Project project, long voteCount) {
@@ -16,7 +17,8 @@ public record ProjectListResponse(
         project.getTitle(),
         project.getServiceUrl(),
         voteCount,
-        project.getTeamName()
+        project.getTeamName(),
+        project.getTeamNumber()
     );
   }
 }

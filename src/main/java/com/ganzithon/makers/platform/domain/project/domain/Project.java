@@ -23,6 +23,9 @@ public class Project extends BaseEntity {
     @Column(name = "team_name", length = 100, nullable = false)
     private String teamName;
 
+    @Column(name = "team_number")
+    private Integer teamNumber;
+
     @Column(name = "summary", length = 200, nullable = false)
     private String summary;
 
@@ -46,6 +49,7 @@ public class Project extends BaseEntity {
     private Project(
         String title,
         String teamName,
+        Integer teamNumber,
         String summary,
         String description,
         String serviceUrl,
@@ -55,6 +59,7 @@ public class Project extends BaseEntity {
     ) {
         this.title = title;
         this.teamName = teamName;
+        this.teamNumber = teamNumber;
         this.summary = summary;
         this.description = description;
         this.serviceUrl = serviceUrl;
@@ -73,9 +78,34 @@ public class Project extends BaseEntity {
         String techStack,
         Platform platform
     ) {
+        return create(
+            title,
+            teamName,
+            null,
+            summary,
+            description,
+            serviceUrl,
+            thumbnailUrl,
+            techStack,
+            platform
+        );
+    }
+
+    public static Project create(
+        String title,
+        String teamName,
+        Integer teamNumber,
+        String summary,
+        String description,
+        String serviceUrl,
+        String thumbnailUrl,
+        String techStack,
+        Platform platform
+    ) {
         return new Project(
             title,
             teamName,
+            teamNumber,
             summary,
             description,
             serviceUrl,
@@ -88,6 +118,7 @@ public class Project extends BaseEntity {
     public void update(
         String title,
         String teamName,
+        Integer teamNumber,
         String summary,
         String description,
         String serviceUrl,
@@ -96,6 +127,7 @@ public class Project extends BaseEntity {
     ) {
         this.title = title;
         this.teamName = teamName;
+        this.teamNumber = teamNumber;
         this.summary = summary;
         this.description = description;
         this.serviceUrl = serviceUrl;
