@@ -1,4 +1,4 @@
-package com.ganzithon.makers.platform.domain.auth.presentation;
+package com.ganzithon.makers.backoffice.auth.presentation;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -17,11 +17,16 @@ import com.ganzithon.makers.platform.domain.auth.application.AuthService;
 import com.ganzithon.makers.platform.domain.auth.application.dto.request.LoginRequest;
 import com.ganzithon.makers.platform.domain.auth.application.dto.response.LoginResponse;
 import com.ganzithon.makers.platform.domain.user.domain.Role;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.*;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 class BackofficeAuthControllerTest {
 
@@ -35,13 +40,28 @@ class BackofficeAuthControllerTest {
         .standaloneSetup(new BackofficeAuthController(authService))
         .setControllerAdvice(new GlobalExceptionHandler())
         .setCustomArgumentResolvers(new AuthUserArgumentResolver())
-        .addFilters(new AuthControllerTest.PrincipalInjectionFilter())
+        .addFilters(new PrincipalInjectionFilter())
         .build();
   }
 
   @AfterEach
   void tearDown() {
     SecurityContextHolder.clearContext();
+  }
+
+  // AuthControllerTest 의 필터와 동일 (패키지가 달라 접근할 수 없어 복사)
+  static class PrincipalInjectionFilter extends OncePerRequestFilter {
+    @Override
+    protected void doFilterInternal(
+        HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+        throws java.io.IOException, jakarta.servlet.ServletException {
+      if (request.getHeader("X-Test-Auth") != null) {
+        AuthPrincipal principal = new AuthPrincipal(1L, Role.PARTICIPANT, "sid-1");
+        SecurityContextHolder.getContext().setAuthentication(
+            new UsernamePasswordAuthenticationToken(principal, null, principal.authorities()));
+      }
+      chain.doFilter(request, response);
+    }
   }
 
   @Nested

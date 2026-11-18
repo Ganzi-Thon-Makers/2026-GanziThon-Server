@@ -47,4 +47,4 @@ ncp:
     public-base-url: ${ncp.storage.endpoint}/${ncp.storage.bucket}
 app:
   cors:
-    allowed-origin-patterns: http://localhost:[*],http://127.0.0.1:[*],https://dev-api.ganzithon.com,https://ganzithon.com,https://admin.ganzithon.com
+    allowed-origin-patterns: http://localhost:[*],http://127.0.0.1:[*],https://dev.ganzithon.com,https://dev-admin.ganzithon.com

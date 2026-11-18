@@ -20,6 +20,9 @@ public final class SecurityPaths {
             "/backoffice/api/v1/timetables/**"
     };
 
+    // 참가자 단건 (수정/삭제는 SUPER_ADMIN 전용, 조회는 어드민 전체) → SecurityConfig 에서 PUT, DELETE 에만 적용
+    public static final String BACKOFFICE_USER = "/backoffice/api/v1/users/*";
+
     // 팀 계정 전용 (스탬프 발급용 QR 생성)
     public static final String[] TEAM_ONLY = {
         "/api/v1/qr-tokens", "/api/v1/qr-tokens/**"
@@ -27,6 +30,7 @@ public final class SecurityPaths {
 
     // 로그인한 사용자만 접근 가능
     public static final String[] AUTHENTICATED = {
-            "/api/v1/timetable/**"
+            "/api/v1/timetable/**",
+            "/api/v1/booth/**"
     };
 }

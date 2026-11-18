@@ -2,6 +2,9 @@ package com.ganzithon.makers.platform.domain.user.application;
 
 import com.ganzithon.makers.common.exception.BusinessException;
 import com.ganzithon.makers.common.exception.ErrorCode;
+import com.ganzithon.makers.platform.domain.user.domain.Role;
+import com.ganzithon.makers.common.exception.BusinessException;
+import com.ganzithon.makers.common.exception.ErrorCode;
 import com.ganzithon.makers.platform.domain.user.application.dto.MyPageInfo;
 import com.ganzithon.makers.platform.domain.user.domain.Role;
 import com.ganzithon.makers.platform.domain.user.domain.User;
@@ -47,31 +50,38 @@ public class UserService {
     return userRepository.findAllByProjectId(projectId);
   }
 
-  public List<User> findAllByIds(List<Long> userIds) {
-      return userRepository.findAllById(userIds);
-  }
-
-  //Team 배제
-  private User findUserById(Long userId) {
-      return userRepository.findByIdAndRoleNot(userId, Role.TEAM)
-              .orElseThrow(() ->
-                      new BusinessException(ErrorCode.USER_NOT_FOUND)
-              );
-  }
-
   public User getById(Long userId) {
     return userRepository.findById(userId)
         .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
   }
 
-  // 동시 적립 요청을 직렬화해야 할 때 사용. 트랜잭션 커밋까지 행 락을 유지한다
-  public User getByIdForUpdate(Long userId) {
-    return userRepository.findByIdForUpdate(userId)
-        .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+  public List<User> findAllByIds(List<Long> userIds) {
+      return userRepository.findAllById(userIds);
   }
 
-  public List<User> findAllByProjectIdAndRole(Long projectId, Role role) {
-    return userRepository.findAllByProjectIdAndRole(projectId, role);
+  public boolean existsByLoginId(String loginId) {
+    return userRepository.existsByLoginId(loginId);
+  }
+
+  // 수정 시 자기 자신은 제외하고 아이디 중복 확인
+  public boolean existsByLoginIdExcept(String loginId, Long userId) {
+    return userRepository.existsByLoginIdAndIdNot(loginId, userId);
+  }
+
+  // login_id UNIQUE 위반을 호출한 쪽에서 바로 잡을 수 있도록 즉시 flush (수정된 엔티티도 이걸로 반영)
+  @Transactional
+  public User save(User user) {
+    return userRepository.saveAndFlush(user);
+  }
+
+  @Transactional
+  public void delete(User user) {
+    userRepository.delete(user);
+  }
+
+  // 이름 부분 일치 + 럭키드로우 응모/수료 여부 필터 (null 인 조건은 적용 안 함). 이름 가나다순
+  public List<User> search(Role role, String nameKeyword, Boolean luckyDrawEntered, Boolean completed) {
+    return userRepository.search(role, toContainsPattern(nameKeyword), luckyDrawEntered, completed);
   }
 
   // 이름 부분 일치(비어 있으면 전체), 이름 가나다순
@@ -89,6 +99,24 @@ public class UserService {
         .replace("%", "!%")
         .replace("_", "!_");
     return "%" + escaped + "%";
+  }
+
+  //Team 배제
+  private User findUserById(Long userId) {
+      return userRepository.findByIdAndRoleNot(userId, Role.TEAM)
+              .orElseThrow(() ->
+                      new BusinessException(ErrorCode.USER_NOT_FOUND)
+              );
+  }
+
+  // 동시 적립 요청을 직렬화해야 할 때 사용. 트랜잭션 커밋까지 행 락을 유지한다
+  public User getByIdForUpdate(Long userId) {
+    return userRepository.findByIdForUpdate(userId)
+        .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+  }
+
+  public List<User> findAllByProjectIdAndRole(Long projectId, Role role) {
+    return userRepository.findAllByProjectIdAndRole(projectId, role);
   }
 
   @Transactional
