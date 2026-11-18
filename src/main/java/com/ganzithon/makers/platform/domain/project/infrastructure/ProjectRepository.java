@@ -8,4 +8,10 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
 
   // 프로젝트명 부분 일치 검색 (%, _ 는 Spring Data 가 이스케이프)
   List<Project> findAllByTitleContainingIgnoreCase(String keyword);
+
+  List<Project> findAllByTeamNumberIsNotNullOrderByTeamNumberAsc();
+
+  boolean existsByTeamNumber(Integer teamNumber);
+
+  boolean existsByTeamNumberAndIdNot(Integer teamNumber, Long id);
 }

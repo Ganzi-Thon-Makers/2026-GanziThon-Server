@@ -8,6 +8,9 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,7 +19,26 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
   List<User> findAllByProjectId(Long projectId);
 
+  List<User> findAllByProjectIdAndRole(Long projectId, Role role);
+
+  // 프로젝트 팀원 선택용 후보 (참가자, 팀 계정). namePattern 이 null 이면 전체. 이스케이프 문자는 '!'
+  @Query("""
+      select u from User u
+      where u.role in :roles
+        and (:namePattern is null or u.name like :namePattern escape '!')
+      order by u.name asc, u.id asc
+      """)
+  List<User> searchByRoles(
+      @Param("roles") List<Role> roles,
+      @Param("namePattern") String namePattern
+  );
+
   Optional<User> findByLoginId(String loginId);
+
+  // 프로젝트 삭제 시 소속 회원의 연결만 해제 (회원은 유지)
+  @Modifying
+  @Query("update User u set u.projectId = null where u.projectId = :projectId")
+  void clearProject(@Param("projectId") Long projectId);
 
   Optional<User> findByIdAndRoleNot(Long id, Role role);
 
@@ -31,17 +53,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
   boolean existsByLoginIdAndIdNot(String loginId, Long id);
 
-  // 여러 role 의 회원을 이름 부분 일치로 검색 (namePattern 이 null 이면 전체). 이스케이프 문자는 '!'
-  @Query("""
-      select u from User u
-      where u.role in :roles
-        and (:namePattern is null or u.name like :namePattern escape '!')
-      order by u.name asc, u.id asc
-      """)
-  List<User> searchByRoles(
-      @Param("roles") List<Role> roles,
-      @Param("namePattern") String namePattern
-  );
+
 
   // 조건이 null 이면 해당 조건은 적용하지 않음. namePattern 의 이스케이프 문자는 '!'
   @Query("""

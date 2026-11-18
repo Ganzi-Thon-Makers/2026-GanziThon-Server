@@ -30,6 +30,9 @@ public enum ErrorCode {
   PROJECT_NOT_FOUND(HttpStatus.NOT_FOUND, "프로젝트를 찾을 수 없습니다."),
   DUPLICATE_PROJECT_MEMBER(HttpStatus.BAD_REQUEST, "같은 회원이 팀원으로 중복 포함되어 있습니다."),
   PROJECT_MEMBER_ALREADY_ASSIGNED(HttpStatus.CONFLICT, "이미 다른 프로젝트에 소속된 회원입니다."),
+  DUPLICATE_TEAM_NUMBER(HttpStatus.CONFLICT, "이미 다른 프로젝트가 사용 중인 팀 번호입니다."),
+  INVALID_PROJECT_MEMBER_ROLE(HttpStatus.BAD_REQUEST, "참가자 또는 팀 계정만 팀원으로 등록할 수 있습니다."),
+  MULTIPLE_TEAM_ACCOUNTS(HttpStatus.BAD_REQUEST, "팀 계정은 프로젝트당 하나만 등록할 수 있습니다."),
 
   // User
   DUPLICATE_LOGIN_ID(HttpStatus.CONFLICT, "이미 사용 중인 아이디입니다."),

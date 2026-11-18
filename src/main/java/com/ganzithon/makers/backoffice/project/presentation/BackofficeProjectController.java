@@ -1,10 +1,12 @@
 package com.ganzithon.makers.backoffice.project.presentation;
 
 import com.ganzithon.makers.backoffice.project.application.BackofficeProjectService;
+import com.ganzithon.makers.backoffice.project.presentation.dto.MemberCandidateResponse;
 import com.ganzithon.makers.backoffice.project.presentation.dto.ProjectCreateRequest;
 import com.ganzithon.makers.backoffice.project.presentation.dto.ProjectDetailResponse;
 import com.ganzithon.makers.backoffice.project.presentation.dto.ProjectListResponse;
 import com.ganzithon.makers.backoffice.project.presentation.dto.ProjectUpdateRequest;
+import com.ganzithon.makers.backoffice.project.presentation.dto.TeamResponse;
 import com.ganzithon.makers.common.dto.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -18,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -49,8 +52,30 @@ public class BackofficeProjectController {
   }
 
   @Operation(
+      summary = "팀 목록 조회",
+      description = "팀 번호 선택용으로 팀 번호, 팀명, 프로젝트 id 만 팀 번호 순으로 조회합니다. 팀 번호가 없는 프로젝트는 제외됩니다.")
+  @GetMapping("/teams")
+  public ResponseEntity<SuccessResponse<List<TeamResponse>>> getTeams() {
+    return ResponseEntity.ok(SuccessResponse.of(backofficeProjectService.getTeams()));
+  }
+
+  @Operation(
+      summary = "팀원 선택 후보 조회",
+      description = "프로젝트 등록·수정의 memberIds 선택용입니다. 참가자(PARTICIPANT)와 팀 계정(TEAM)을 이름 가나다순으로 조회합니다. "
+          + "projectId 는 현재 소속 프로젝트이며, null 이면 미소속입니다. 다른 프로젝트 소속 회원을 보내면 409입니다. "
+          + "팀 계정은 프로젝트당 하나이며, memberIds 에 넣으면 기존 팀 계정과 교체되고 넣지 않으면 기존 연결이 유지됩니다.")
+  @GetMapping("/member-candidates")
+  public ResponseEntity<SuccessResponse<List<MemberCandidateResponse>>> getMemberCandidates(
+      @Parameter(description = "이름 검색어 (일부 일치, 생략 시 전체)", example = "김")
+      @RequestParam(required = false) String keyword
+  ) {
+    return ResponseEntity.ok(SuccessResponse.of(backofficeProjectService.getMemberCandidates(keyword)));
+  }
+
+  @Operation(
       summary = "프로젝트 상세 조회",
-      description = "팀원은 파트 순(PLAN → DESIGN → WEB → APP → SERVER)으로 정렬됩니다. 득표수는 조회만 가능합니다.")
+      description = "members 는 참가자만 파트 순(PLAN → DESIGN → WEB → APP → SERVER)으로 정렬됩니다. "
+          + "연결된 팀 계정은 응답하지 않습니다. 득표수는 조회만 가능합니다.")
   @GetMapping("/{projectId}")
   public ResponseEntity<SuccessResponse<ProjectDetailResponse>> getProject(@PathVariable Long projectId) {
     return ResponseEntity.ok(SuccessResponse.of(backofficeProjectService.getProject(projectId)));
@@ -59,7 +84,8 @@ public class BackofficeProjectController {
   @Operation(
       summary = "프로젝트 등록",
       description = "multipart/form-data 로 request와 대표 이미지 파일을 함께 보냅니다. "
-          + "memberIds 에는 팀원(회원 id) 최종 목록을 보내며, 이미 다른 프로젝트에 소속된 회원은 등록할 수 없습니다.")
+          + "memberIds 에는 참가자 회원 id 와 팀 계정 id(최대 1개)를 보내며, 이미 다른 프로젝트에 소속된 회원은 등록할 수 없습니다. "
+          + "후보는 팀원 선택 후보 조회 API 를 사용하세요.")
   @RequestBody(content = @Content(
       mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
       encoding = @Encoding(name = "request", contentType = MediaType.APPLICATION_JSON_VALUE)))
@@ -76,7 +102,8 @@ public class BackofficeProjectController {
       summary = "프로젝트 수정",
       description = "multipart/form-data 로 request와 대표 이미지 파일을 함께 보냅니다. "
           + "대표 이미지를 바꾸지 않으면 thumbnail 은 보내지 않아도 됩니다. "
-          + "memberIds 에는 팀원(회원 id) 최종 목록을 보내며, 목록에서 빠진 팀원은 프로젝트에서 연결 해제됩니다. "
+          + "memberIds 에는 참가자 최종 목록을 보내며, 목록에서 빠진 참가자는 연결 해제됩니다. "
+          + "팀 계정은 넣지 않으면 기존 연결이 유지되고, 넣으면 교체됩니다. "
           + "득표수는 수정할 수 없습니다.")
   @RequestBody(content = @Content(
       mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
@@ -88,5 +115,15 @@ public class BackofficeProjectController {
       @RequestPart(value = "thumbnail", required = false) MultipartFile thumbnail
   ) {
     return ResponseEntity.ok(SuccessResponse.of(backofficeProjectService.update(projectId, request, thumbnail)));
+  }
+
+  @Operation(
+      summary = "프로젝트 삭제",
+      description = "되돌릴 수 없습니다. 팀원과 부스는 연결만 해제되고, 프로젝트가 받은 투표는 삭제됩니다. "
+          + "(투표했던 참가자는 다시 투표할 수 있습니다)")
+  @DeleteMapping("/{projectId}")
+  public ResponseEntity<SuccessResponse<Void>> delete(@PathVariable Long projectId) {
+    backofficeProjectService.delete(projectId);
+    return ResponseEntity.ok(SuccessResponse.of("삭제되었습니다."));
   }
 }

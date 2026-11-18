@@ -30,6 +30,12 @@ public class VoteService {
     return voteRepository.countByProjectId(projectId);
   }
 
+  // 프로젝트 삭제 시 그 프로젝트가 받은 투표도 삭제 (투표했던 회원은 다시 투표 가능)
+  @Transactional
+  public void deleteAllByProjectId(Long projectId) {
+    voteRepository.deleteAllByProjectId(projectId);
+  }
+
   @Transactional
   public Vote cast(Long userId, Long projectId) {
     if (voteRepository.existsByUserId(userId)) {
