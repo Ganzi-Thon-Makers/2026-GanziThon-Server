@@ -78,6 +78,7 @@ public class StampFacade {
     }
 
     return new StampCollectResponse(
+        booth.getId(),
         (int) collectedCount,
         remainingToLuckyDraw(collectedCount),
         user.isLuckyDrawEntered(),
@@ -93,8 +94,8 @@ public class StampFacade {
 
     List<Stamp> stamps = stampService.findAllByUserId(userId);
     List<Booth> allBooths = boothService.findAllOrderByBoothNumber();
-    Map<Long, Booth> boothsById = allBooths.stream()
-        .collect(Collectors.toMap(Booth::getId, booth -> booth));
+    Map<Long, Stamp> stampsByBoothId = stamps.stream()
+        .collect(Collectors.toMap(Stamp::getBoothId, stamp -> stamp));
 
     List<Long> projectIds = allBooths.stream()
         .map(Booth::getProjectId)
@@ -104,49 +105,40 @@ public class StampFacade {
     Map<Long, String> teamNamesByProjectId = projectService.findAllByIds(projectIds).stream()
         .collect(Collectors.toMap(Project::getId, Project::getTeamName));
 
-    List<StampBoardResponse.CollectedStamp> collectedStamps = stamps.stream()
-        .map(stamp -> {
-          Booth booth = boothsById.get(stamp.getBoothId());
-          String boothName = booth != null
-              ? teamNamesByProjectId.get(booth.getProjectId())
-              : null;
-          return new StampBoardResponse.CollectedStamp(
-              stamp.getBoothId(),
-              boothName,
-              booth != null ? booth.getZone() : null,
-              booth != null ? booth.getBoothNumber() : null,
-              stamp.getCreatedAt()
-          );
-        })
-        .toList();
-
-    Map<Zone, List<StampBoardResponse.CollectedStamp>> stampsByZone = collectedStamps.stream()
-        .filter(s -> s.zone() != null)
-        .collect(Collectors.groupingBy(StampBoardResponse.CollectedStamp::zone));
-
-    Map<Zone, Long> totalByZone = allBooths.stream()
-        .collect(Collectors.groupingBy(Booth::getZone, Collectors.counting()));
+    Map<Zone, List<Booth>> boothsByZone = allBooths.stream()
+        .collect(Collectors.groupingBy(Booth::getZone));
 
     List<StampBoardResponse.ZoneStatus> zoneStatuses = Arrays.stream(Zone.values())
         .map(zone -> {
-          int total = totalByZone.getOrDefault(zone, 0L).intValue();
-          List<StampBoardResponse.CollectedStamp> zoneStamps =
-              stampsByZone.getOrDefault(zone, List.of());
-          int collected = zoneStamps.size();
+          List<Booth> zoneBooths = boothsByZone.getOrDefault(zone, List.of());
+          List<StampBoardResponse.BoothStamp> boothStamps = zoneBooths.stream()
+              .map(booth -> {
+                Stamp stamp = stampsByBoothId.get(booth.getId());
+                return new StampBoardResponse.BoothStamp(
+                    booth.getId(),
+                    teamNamesByProjectId.get(booth.getProjectId()),
+                    booth.getBoothNumber(),
+                    stamp != null,
+                    stamp != null ? stamp.getCreatedAt() : null
+                );
+              })
+              .toList();
+          int total = zoneBooths.size();
+          int collected = (int) boothStamps.stream().filter(StampBoardResponse.BoothStamp::collected).count();
           return new StampBoardResponse.ZoneStatus(
               zone,
               total,
               collected,
               total - collected,
               collected >= stampProperties.zoneCompletionThreshold(),
-              zoneStamps
+              boothStamps
           );
         })
         .toList();
 
     return new StampBoardResponse(
-        collectedStamps.size(),
-        remainingToLuckyDraw(collectedStamps.size()),
+        stamps.size(),
+        remainingToLuckyDraw(stamps.size()),
         user.isLuckyDrawEntered(),
         zoneStatuses
     );
