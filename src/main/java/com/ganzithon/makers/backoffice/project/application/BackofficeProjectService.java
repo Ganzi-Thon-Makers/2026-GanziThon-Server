@@ -5,6 +5,7 @@ import com.ganzithon.makers.backoffice.project.presentation.dto.ProjectCreateReq
 import com.ganzithon.makers.backoffice.project.presentation.dto.ProjectDetailResponse;
 import com.ganzithon.makers.backoffice.project.presentation.dto.ProjectListResponse;
 import com.ganzithon.makers.backoffice.project.presentation.dto.ProjectUpdateRequest;
+import com.ganzithon.makers.backoffice.project.presentation.dto.TeamResponse;
 import com.ganzithon.makers.common.exception.BusinessException;
 import com.ganzithon.makers.common.exception.ErrorCode;
 import com.ganzithon.makers.platform.domain.booth.application.BoothService;
@@ -55,6 +56,13 @@ public class BackofficeProjectService {
         // 득표수 많은 순, 같으면 등록 순(id 오름차순)
         .sorted(Comparator.comparingLong(ProjectListResponse::voteCount).reversed()
             .thenComparing(ProjectListResponse::id))
+        .toList();
+  }
+
+  // 팀 번호 선택용 (팀 번호가 없는 프로젝트는 제외)
+  public List<TeamResponse> getTeams() {
+    return projectService.findAllWithTeamNumber().stream()
+        .map(TeamResponse::of)
         .toList();
   }
 

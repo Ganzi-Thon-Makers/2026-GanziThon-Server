@@ -29,6 +29,11 @@ public class ProjectService {
     return projectRepository.findAllByTitleContainingIgnoreCase(keyword);
   }
 
+  // 팀 번호가 있는 프로젝트만, 팀 번호 순
+  public List<Project> findAllWithTeamNumber() {
+    return projectRepository.findAllByTeamNumberIsNotNullOrderByTeamNumberAsc();
+  }
+
   public boolean existsByTeamNumber(Integer teamNumber) {
     return projectRepository.existsByTeamNumber(teamNumber);
   }

@@ -5,6 +5,7 @@ import com.ganzithon.makers.backoffice.project.presentation.dto.ProjectCreateReq
 import com.ganzithon.makers.backoffice.project.presentation.dto.ProjectDetailResponse;
 import com.ganzithon.makers.backoffice.project.presentation.dto.ProjectListResponse;
 import com.ganzithon.makers.backoffice.project.presentation.dto.ProjectUpdateRequest;
+import com.ganzithon.makers.backoffice.project.presentation.dto.TeamResponse;
 import com.ganzithon.makers.common.dto.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -47,6 +48,14 @@ public class BackofficeProjectController {
       @RequestParam(required = false) String keyword
   ) {
     return ResponseEntity.ok(SuccessResponse.of(backofficeProjectService.getProjects(keyword)));
+  }
+
+  @Operation(
+      summary = "팀 목록 조회",
+      description = "팀 번호 선택용으로 팀 번호, 팀명, 프로젝트 id 만 팀 번호 순으로 조회합니다. 팀 번호가 없는 프로젝트는 제외됩니다.")
+  @GetMapping("/teams")
+  public ResponseEntity<SuccessResponse<List<TeamResponse>>> getTeams() {
+    return ResponseEntity.ok(SuccessResponse.of(backofficeProjectService.getTeams()));
   }
 
   @Operation(
