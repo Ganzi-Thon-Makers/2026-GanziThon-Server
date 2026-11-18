@@ -27,6 +27,7 @@ public final class SecurityPaths {
 
     // 로그인한 사용자만 접근 가능
     public static final String[] AUTHENTICATED = {
-            "/api/v1/timetable/**"
+            "/api/v1/timetable/**",
+            "/api/v1/booth/**"
     };
 }
