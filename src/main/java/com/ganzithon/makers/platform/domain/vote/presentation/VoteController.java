@@ -4,10 +4,12 @@ import com.ganzithon.makers.common.dto.SuccessResponse;
 import com.ganzithon.makers.common.security.AuthPrincipal;
 import com.ganzithon.makers.common.security.AuthUser;
 import com.ganzithon.makers.platform.domain.vote.application.VoteFacade;
+import com.ganzithon.makers.platform.domain.vote.presentation.dto.VotePeriodResponse;
 import com.ganzithon.makers.platform.domain.vote.presentation.dto.VoteSubmitRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,5 +30,11 @@ public class VoteController implements VoteApi {
   ) {
     voteFacade.submit(principal, request);
     return ResponseEntity.ok(SuccessResponse.of("투표가 완료되었습니다."));
+  }
+
+  @Override
+  @GetMapping("/period")
+  public ResponseEntity<SuccessResponse<VotePeriodResponse>> getPeriod() {
+    return ResponseEntity.ok(SuccessResponse.of(voteFacade.getPeriod()));
   }
 }
