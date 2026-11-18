@@ -63,4 +63,10 @@ public class UserService {
     return userRepository.findById(userId)
         .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
   }
+
+  // 동시 적립 요청을 직렬화해야 할 때 사용. 트랜잭션 커밋까지 행 락을 유지한다
+  public User getByIdForUpdate(Long userId) {
+    return userRepository.findByIdForUpdate(userId)
+        .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+  }
 }

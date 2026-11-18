@@ -18,6 +18,8 @@ public class QrTokenService {
 
   private static final SecureRandom SECURE_RANDOM = new SecureRandom();
   private static final int TOKEN_BYTE_LENGTH = 32;
+  // 만료 직후 삭제되면 스캔 시 EXPIRED가 아닌 NOT_FOUND가 되므로, 만료 후에도 한동안 보관한다
+  private static final long EXPIRED_TOKEN_RETENTION_SECONDS = 3600L;
 
   private final QrTokenRepository qrTokenRepository;
   private final StampProperties stampProperties;
@@ -42,7 +44,8 @@ public class QrTokenService {
 
   @Transactional
   public void deleteExpiredTokens() {
-    LocalDateTime threshold = LocalDateTime.now().minusSeconds(stampProperties.qrTokenGraceSeconds());
+    LocalDateTime threshold = LocalDateTime.now()
+        .minusSeconds(stampProperties.qrTokenGraceSeconds() + EXPIRED_TOKEN_RETENTION_SECONDS);
     qrTokenRepository.deleteByExpiresAtBefore(threshold);
   }
 

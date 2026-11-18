@@ -44,6 +44,9 @@ public class StampFacade {
     if (user.getRole() != Role.TEAM) {
       throw new BusinessException(ErrorCode.FORBIDDEN);
     }
+    if (user.getProjectId() == null) {
+      throw new BusinessException(ErrorCode.BOOTH_NOT_FOUND);
+    }
 
     Booth booth = boothService.findByProjectId(user.getProjectId());
     QrToken qrToken = qrTokenService.issue(booth.getId());
@@ -57,14 +60,15 @@ public class StampFacade {
 
   @Transactional
   public StampCollectResponse collect(Long userId, String token) {
-    User user = userService.getById(userId);
+    // 행 락으로 동일 회원의 동시 적립 요청을 직렬화해 쿨다운 우회와 럭키드로우 중복 등록을 막는다
+    User user = userService.getByIdForUpdate(userId);
     if (user.getRole() != Role.PARTICIPANT) {
       throw new BusinessException(ErrorCode.STAMP_PARTICIPANT_ONLY);
     }
 
     QrToken qrToken = qrTokenService.validate(token);
     Booth booth = boothService.findById(qrToken.getBoothId());
-    if (booth.getProjectId().equals(user.getProjectId())) {
+    if (booth.getProjectId() != null && booth.getProjectId().equals(user.getProjectId())) {
       throw new BusinessException(ErrorCode.STAMP_OWN_BOOTH);
     }
 
