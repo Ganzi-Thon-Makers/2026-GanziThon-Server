@@ -17,14 +17,14 @@ public record StampBoardResponse(
       int collectedCount,
       int remainingCount,
       boolean completed,
-      List<CollectedStamp> stamps
+      List<BoothStamp> booths
   ) {}
 
-  public record CollectedStamp(
+  public record BoothStamp(
       Long boothId,
       String boothName,
-      Zone zone,
       Integer boothNumber,
+      boolean collected,
       LocalDateTime collectedAt
   ) {}
 }
