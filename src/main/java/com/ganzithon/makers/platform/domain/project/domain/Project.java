@@ -7,6 +7,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,7 +15,10 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@Table(name = "project")
+// team_number 는 null 허용이지만, MySQL UNIQUE 는 NULL 끼리는 중복으로 보지 않아 팀 번호가 없는 프로젝트는 여러 개 가능
+@Table(name = "project", uniqueConstraints = {
+    @UniqueConstraint(name = "uk_project_team_number", columnNames = "team_number")
+})
 public class Project extends BaseEntity {
 
     @Column(name = "title", length = 100, nullable = false)

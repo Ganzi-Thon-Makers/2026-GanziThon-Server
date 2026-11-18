@@ -25,6 +25,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -94,7 +95,7 @@ public class BackofficeProjectService {
     String thumbnailUrl = imageStorage.upload(thumbnail, THUMBNAIL_DIRECTORY);
     deleteImageOnRollback(thumbnailUrl);
 
-    Project project = projectService.save(Project.create(
+    Project project = saveWithTeamNumberCheck(Project.create(
         request.title(),
         request.teamName(),
         request.teamNumber(),
@@ -142,6 +143,7 @@ public class BackofficeProjectService {
         request.techStack(),
         request.platform()
     );
+    saveWithTeamNumberCheck(project);
 
     // 참가자: 요청 목록에서 빠지면 연결 해제
     for (User current : userService.findAllByProjectIdAndRole(projectId, Role.PARTICIPANT)) {
@@ -189,6 +191,15 @@ public class BackofficeProjectService {
       throw new BusinessException(ErrorCode.USER_NOT_FOUND);
     }
     return users;
+  }
+
+  // 위의 exists 확인을 동시 요청이 함께 통과한 경우, DB UNIQUE 제약(team_number)이 막는다
+  private Project saveWithTeamNumberCheck(Project project) {
+    try {
+      return projectService.save(project);
+    } catch (DataIntegrityViolationException e) {
+      throw new BusinessException(ErrorCode.DUPLICATE_TEAM_NUMBER);
+    }
   }
 
   // 참가자, 팀 계정만 가능. 팀 계정은 최대 1개
