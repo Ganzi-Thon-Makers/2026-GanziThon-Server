@@ -47,10 +47,12 @@ public class VoteFacade {
     voteService.cast(user.getId(), request.projectId());
   }
 
+  // 일정 미등록은 "투표 준비 중"으로 간주해 NOT_STARTED와 null 시간을 내려준다
   public VotePeriodResponse getPeriod() {
-    Timetable timetable = timetableRepository.findByVoteTrue()
-        .orElseThrow(() -> new BusinessException(ErrorCode.VOTE_TIMETABLE_NOT_FOUND));
-    return VotePeriodResponse.of(timetable, LocalDateTime.now(clock));
+    LocalDateTime now = LocalDateTime.now(clock);
+    return timetableRepository.findByVoteTrue()
+        .map(timetable -> VotePeriodResponse.of(timetable, now))
+        .orElseGet(() -> VotePeriodResponse.notStarted(now));
   }
 
   private void validateVoteInProgress() {

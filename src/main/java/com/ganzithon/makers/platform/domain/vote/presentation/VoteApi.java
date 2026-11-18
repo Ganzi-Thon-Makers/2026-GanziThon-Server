@@ -45,13 +45,14 @@ public interface VoteApi {
   @Operation(
       summary = "투표 기간 조회",
       description = "어드민이 등록한 투표 시작, 종료 시각과 현재 상태(NOT_STARTED/IN_PROGRESS/PAUSED/ENDED)를 조회합니다. "
-          + "PAUSED 상태에서는 투표가 불가능합니다.",
+          + "PAUSED 상태에서는 투표가 불가능합니다. "
+          + "일정이 아직 등록되지 않은 경우에도 status=NOT_STARTED와 null 시간으로 응답하며, "
+          + "serverTime은 카운트다운 시 클라이언트 시계 오차 방지용입니다.",
       security = @SecurityRequirement(name = "bearerAuth")
   )
   @ApiErrorResponse(value = ErrorCode.UNAUTHORIZED, description = "인증되지 않은 경우")
   @ApiErrorResponse(value = ErrorCode.TOKEN_EXPIRED, description = "accessToken이 만료된 경우 (refresh로 재발급 필요)")
   @ApiErrorResponse(value = ErrorCode.LOGGED_IN_ELSEWHERE, description = "다른 기기에서 로그인되어 세션이 종료된 경우")
-  @ApiErrorResponse(value = ErrorCode.VOTE_TIMETABLE_NOT_FOUND, description = "투표 일정이 등록되지 않은 경우")
   @GetMapping("/period")
   ResponseEntity<SuccessResponse<VotePeriodResponse>> getPeriod();
 }
