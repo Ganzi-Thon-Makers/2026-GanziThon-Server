@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class UserService {
 
-    private final UserRepository userRepository;
+  private final UserRepository userRepository;
 
   public MyPageResponse getMyPage(Long userId) {
         User user = findUserById(userId);
@@ -43,18 +43,30 @@ public class UserService {
                 );
     }
 
-    public List<User> findAllByProjectId(Long projectId) {
-        return userRepository.findAllByProjectId(projectId);
-    }
+  public List<User> findAllByProjectId(Long projectId) {
+    return userRepository.findAllByProjectId(projectId);
+  }
 
-    public List<User> findAllByIds(List<Long> userIds) {
-        return userRepository.findAllById(userIds);
-    }
-    //Team 배제
-    private User findUserById(Long userId) {
-        return userRepository.findByIdAndRoleNot(userId, Role.TEAM)
-                .orElseThrow(() ->
-                        new BusinessException(ErrorCode.USER_NOT_FOUND)
-                );
-    }
+  public List<User> findAllByIds(List<Long> userIds) {
+      return userRepository.findAllById(userIds);
+  }
+
+  //Team 배제
+  private User findUserById(Long userId) {
+      return userRepository.findByIdAndRoleNot(userId, Role.TEAM)
+              .orElseThrow(() ->
+                      new BusinessException(ErrorCode.USER_NOT_FOUND)
+              );
+  }
+
+  public User getById(Long userId) {
+    return userRepository.findById(userId)
+        .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+  }
+
+  // 동시 적립 요청을 직렬화해야 할 때 사용. 트랜잭션 커밋까지 행 락을 유지한다
+  public User getByIdForUpdate(Long userId) {
+    return userRepository.findByIdForUpdate(userId)
+        .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+  }
 }
