@@ -101,10 +101,11 @@ public class ErrorResponseCustomizer implements OperationCustomizer {
   private ErrorResponse toExampleBody(ErrorCode errorCode) {
     if (errorCode == ErrorCode.INVALID_INPUT) {
       return ErrorResponse.of(
+          errorCode,
           errorCode.getMessage(),
           List.of(ErrorResponse.FieldError.of("fieldName", "검증 실패 사유")));
     }
-    return ErrorResponse.of(errorCode.getMessage());
+    return ErrorResponse.of(errorCode);
   }
 
   private String reasonPhrase(int status) {
