@@ -34,9 +34,7 @@ public class ProjectBoothQueryFacade {
   public Map<Zone, List<ProjectSummaryResponse>> getProjectsGroupedByZone(Long userId) {
     List<Booth> booths = boothService.findAllOrderByBoothNumber();
 
-    Set<Long> votedProjectIds = userId != null
-        ? voteService.findVotedProjectIdsByUserId(userId)
-        : Set.of();
+    Set<Long> votedProjectIds = voteService.findVotedProjectIdsByUserId(userId);
 
     List<Long> projectIds = booths.stream()
         .map(Booth::getProjectId)
