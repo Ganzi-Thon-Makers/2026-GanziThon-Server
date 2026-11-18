@@ -39,6 +39,10 @@ public class StampService {
     }
   }
 
+  public boolean existsByUserIdAndBoothId(Long userId, Long boothId) {
+    return stampRepository.existsByUserIdAndBoothId(userId, boothId);
+  }
+
   public long countByUserId(Long userId) {
     return stampRepository.countByUserId(userId);
   }

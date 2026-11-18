@@ -5,5 +5,6 @@ public record StampCollectResponse(
     int collectedCount,
     int remainingToLuckyDraw,
     boolean luckyDrawEntered,
-    boolean luckyDrawJustEntered
+    boolean luckyDrawJustEntered,
+    boolean alreadyCollected
 ) {}

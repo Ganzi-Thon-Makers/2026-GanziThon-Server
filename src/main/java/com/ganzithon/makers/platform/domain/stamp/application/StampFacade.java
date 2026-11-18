@@ -72,7 +72,19 @@ public class StampFacade {
       throw new BusinessException(ErrorCode.STAMP_OWN_BOOTH);
     }
 
-    stampService.collect(userId, booth.getId());
+    // 이미 적립한 부스는 에러 대신 200으로 응답해 어떤 부스인지 알려준다
+    if (stampService.existsByUserIdAndBoothId(userId, booth.getId())) {
+      return alreadyCollectedResponse(userId, booth.getId(), user);
+    }
+
+    try {
+      stampService.collect(userId, booth.getId());
+    } catch (BusinessException e) {
+      if (e.getErrorCode() == ErrorCode.STAMP_ALREADY_COLLECTED) {
+        return alreadyCollectedResponse(userId, booth.getId(), user);
+      }
+      throw e;
+    }
 
     long collectedCount = stampService.countByUserId(userId);
     boolean justEntered = false;
@@ -86,7 +98,20 @@ public class StampFacade {
         (int) collectedCount,
         remainingToLuckyDraw(collectedCount),
         user.isLuckyDrawEntered(),
-        justEntered
+        justEntered,
+        false
+    );
+  }
+
+  private StampCollectResponse alreadyCollectedResponse(Long userId, Long boothId, User user) {
+    long collectedCount = stampService.countByUserId(userId);
+    return new StampCollectResponse(
+        boothId,
+        (int) collectedCount,
+        remainingToLuckyDraw(collectedCount),
+        user.isLuckyDrawEntered(),
+        false,
+        true
     );
   }
 
