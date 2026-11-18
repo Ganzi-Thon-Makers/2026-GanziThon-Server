@@ -50,6 +50,27 @@ public class UserService {
     public List<User> findAllByIds(List<Long> userIds) {
         return userRepository.findAllById(userIds);
     }
+
+  public List<User> findAllByProjectIdAndRole(Long projectId, Role role) {
+    return userRepository.findAllByProjectIdAndRole(projectId, role);
+  }
+
+  // 이름 부분 일치(비어 있으면 전체), 이름 가나다순
+  public List<User> searchByRoles(List<Role> roles, String nameKeyword) {
+    return userRepository.searchByRoles(roles, toContainsPattern(nameKeyword));
+  }
+
+  // 검색어의 %, _ 를 글자 그대로 찾도록 이스케이프 ('!' 사용). 비어 있으면 null
+  private static String toContainsPattern(String keyword) {
+    if (keyword == null || keyword.isBlank()) {
+      return null;
+    }
+    String escaped = keyword.strip()
+        .replace("!", "!!")
+        .replace("%", "!%")
+        .replace("_", "!_");
+    return "%" + escaped + "%";
+  }
     //Team 배제
     private User findUserById(Long userId) {
         return userRepository.findByIdAndRoleNot(userId, Role.TEAM)

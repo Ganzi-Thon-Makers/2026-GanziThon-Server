@@ -13,6 +13,20 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
   List<User> findAllByProjectId(Long projectId);
 
+  List<User> findAllByProjectIdAndRole(Long projectId, Role role);
+
+  // 프로젝트 팀원 선택용 후보 (참가자, 팀 계정). namePattern 이 null 이면 전체. 이스케이프 문자는 '!'
+  @Query("""
+      select u from User u
+      where u.role in :roles
+        and (:namePattern is null or u.name like :namePattern escape '!')
+      order by u.name asc, u.id asc
+      """)
+  List<User> searchByRoles(
+      @Param("roles") List<Role> roles,
+      @Param("namePattern") String namePattern
+  );
+
   Optional<User> findByLoginId(String loginId);
 
   // 프로젝트 삭제 시 소속 회원의 연결만 해제 (회원은 유지)

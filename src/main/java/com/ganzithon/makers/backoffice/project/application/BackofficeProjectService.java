@@ -1,6 +1,7 @@
 package com.ganzithon.makers.backoffice.project.application;
 
 import com.ganzithon.makers.backoffice.image.storage.ImageStorage;
+import com.ganzithon.makers.backoffice.project.presentation.dto.MemberCandidateResponse;
 import com.ganzithon.makers.backoffice.project.presentation.dto.ProjectCreateRequest;
 import com.ganzithon.makers.backoffice.project.presentation.dto.ProjectDetailResponse;
 import com.ganzithon.makers.backoffice.project.presentation.dto.ProjectListResponse;
@@ -12,6 +13,7 @@ import com.ganzithon.makers.platform.domain.booth.application.BoothService;
 import com.ganzithon.makers.platform.domain.project.application.ProjectService;
 import com.ganzithon.makers.platform.domain.project.domain.Project;
 import com.ganzithon.makers.platform.domain.user.application.UserService;
+import com.ganzithon.makers.platform.domain.user.domain.Role;
 import com.ganzithon.makers.platform.domain.user.domain.User;
 import com.ganzithon.makers.platform.domain.vote.application.VoteService;
 import java.util.Collection;
@@ -37,6 +39,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class BackofficeProjectService {
 
   private static final String THUMBNAIL_DIRECTORY = "projects/thumbnails";
+  private static final List<Role> MEMBER_ROLES = List.of(Role.PARTICIPANT, Role.TEAM);
 
   private final ProjectService projectService;
   private final VoteService voteService;
@@ -66,16 +69,23 @@ public class BackofficeProjectService {
         .toList();
   }
 
+  // 팀원 선택용 후보: 참가자, 팀 계정. 다른 프로젝트 소속 여부는 projectId 로 판단
+  public List<MemberCandidateResponse> getMemberCandidates(String keyword) {
+    return userService.searchByRoles(MEMBER_ROLES, keyword).stream()
+        .map(MemberCandidateResponse::of)
+        .toList();
+  }
+
   public ProjectDetailResponse getProject(Long projectId) {
     Project project = projectService.findById(projectId);
-    long voteCount = voteService.countByProjectId(projectId);
-    return ProjectDetailResponse.of(project, voteCount, toMembers(userService.findAllByProjectId(projectId)));
+    return toDetail(project, voteService.countByProjectId(projectId));
   }
 
   @Transactional
   public ProjectDetailResponse create(ProjectCreateRequest request, MultipartFile thumbnail) {
     // 팀원·팀 번호 검증을 먼저 끝내서, 검증 실패 시 이미지가 업로드되지 않도록 함
     Map<Long, User> users = findMembers(request.memberIdsOrEmpty());
+    validateMemberRoles(users.values());
     users.values().forEach(user -> validateAssignable(user, null));
     if (projectService.existsByTeamNumber(request.teamNumber())) {
       throw new BusinessException(ErrorCode.DUPLICATE_TEAM_NUMBER);
@@ -98,7 +108,7 @@ public class BackofficeProjectService {
 
     users.values().forEach(user -> user.joinProject(project.getId()));
 
-    return ProjectDetailResponse.of(project, 0L, toMembers(users.values()));
+    return toDetail(project, 0L);
   }
 
   // thumbnail 이 없으면 기존 대표 이미지 유지
@@ -108,6 +118,7 @@ public class BackofficeProjectService {
 
     // 팀원·팀 번호 검증을 먼저 끝내서, 검증 실패 시 이미지가 업로드되지 않도록 함
     Map<Long, User> users = findMembers(request.memberIdsOrEmpty());
+    validateMemberRoles(users.values());
     users.values().forEach(user -> validateAssignable(user, projectId));
     if (projectService.existsByTeamNumberExcept(request.teamNumber(), projectId)) {
       throw new BusinessException(ErrorCode.DUPLICATE_TEAM_NUMBER);
@@ -132,16 +143,24 @@ public class BackofficeProjectService {
         request.platform()
     );
 
-    // 요청 목록에서 빠진 기존 팀원은 연결 해제, 요청 목록의 팀원은 연결
-    for (User current : userService.findAllByProjectId(projectId)) {
+    // 참가자: 요청 목록에서 빠지면 연결 해제
+    for (User current : userService.findAllByProjectIdAndRole(projectId, Role.PARTICIPANT)) {
       if (!users.containsKey(current.getId())) {
         current.leaveProject();
       }
     }
+    // 팀 계정: 요청에 있으면 교체, 없으면 기존 연결 유지
+    boolean teamAccountRequested = users.values().stream().anyMatch(user -> user.getRole() == Role.TEAM);
+    if (teamAccountRequested) {
+      for (User current : userService.findAllByProjectIdAndRole(projectId, Role.TEAM)) {
+        if (!users.containsKey(current.getId())) {
+          current.leaveProject();
+        }
+      }
+    }
     users.values().forEach(user -> user.joinProject(projectId));
 
-    long voteCount = voteService.countByProjectId(projectId);
-    return ProjectDetailResponse.of(project, voteCount, toMembers(users.values()));
+    return toDetail(project, voteService.countByProjectId(projectId));
   }
 
   // 팀원·부스는 연결만 해제하고, 받은 투표는 삭제. 대표 이미지는 커밋 후 삭제 (롤백되면 유지)
@@ -170,6 +189,22 @@ public class BackofficeProjectService {
       throw new BusinessException(ErrorCode.USER_NOT_FOUND);
     }
     return users;
+  }
+
+  // 참가자, 팀 계정만 가능. 팀 계정은 최대 1개
+  private void validateMemberRoles(Collection<User> users) {
+    if (users.stream().anyMatch(user -> !MEMBER_ROLES.contains(user.getRole()))) {
+      throw new BusinessException(ErrorCode.INVALID_PROJECT_MEMBER_ROLE);
+    }
+    if (users.stream().filter(user -> user.getRole() == Role.TEAM).count() > 1) {
+      throw new BusinessException(ErrorCode.MULTIPLE_TEAM_ACCOUNTS);
+    }
+  }
+
+  // 상세 응답: 팀원 목록은 참가자만 (팀 계정은 응답하지 않음)
+  private ProjectDetailResponse toDetail(Project project, long voteCount) {
+    List<User> participants = userService.findAllByProjectIdAndRole(project.getId(), Role.PARTICIPANT);
+    return ProjectDetailResponse.of(project, voteCount, toMembers(participants));
   }
 
   // 소속이 없거나 이 프로젝트 소속이면 연결 가능. 다른 프로젝트 소속이면 409 (등록 시 projectId 는 null)
