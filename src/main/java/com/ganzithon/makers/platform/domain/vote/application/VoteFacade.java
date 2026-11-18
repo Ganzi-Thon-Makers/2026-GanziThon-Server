@@ -4,11 +4,13 @@ import com.ganzithon.makers.common.exception.BusinessException;
 import com.ganzithon.makers.common.exception.ErrorCode;
 import com.ganzithon.makers.common.security.AuthPrincipal;
 import com.ganzithon.makers.platform.domain.project.application.ProjectService;
+import com.ganzithon.makers.platform.domain.timetable.domain.Timetable;
 import com.ganzithon.makers.platform.domain.timetable.domain.VoteStatus;
 import com.ganzithon.makers.platform.domain.timetable.infrastructure.TimetableRepository;
 import com.ganzithon.makers.platform.domain.user.application.UserService;
 import com.ganzithon.makers.platform.domain.user.domain.Role;
 import com.ganzithon.makers.platform.domain.user.domain.User;
+import com.ganzithon.makers.platform.domain.vote.presentation.dto.VotePeriodResponse;
 import com.ganzithon.makers.platform.domain.vote.presentation.dto.VoteSubmitRequest;
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -43,6 +45,12 @@ public class VoteFacade {
     validateVoteInProgress();
 
     voteService.cast(user.getId(), request.projectId());
+  }
+
+  public VotePeriodResponse getPeriod() {
+    Timetable timetable = timetableRepository.findByVoteTrue()
+        .orElseThrow(() -> new BusinessException(ErrorCode.VOTE_TIMETABLE_NOT_FOUND));
+    return VotePeriodResponse.of(timetable, LocalDateTime.now(clock));
   }
 
   private void validateVoteInProgress() {
