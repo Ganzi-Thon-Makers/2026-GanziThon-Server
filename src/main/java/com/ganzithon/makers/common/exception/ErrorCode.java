@@ -14,6 +14,7 @@ public enum ErrorCode {
   NOT_FOUND(HttpStatus.NOT_FOUND, "요청한 리소스를 찾을 수 없습니다."),
   METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "지원하지 않는 요청 메서드입니다."),
   MAX_UPLOAD_SIZE_EXCEEDED(HttpStatus.CONTENT_TOO_LARGE, "업로드 가능한 최대 용량을 초과했습니다."),
+  REQUEST_PROCESS_FAILED(HttpStatus.BAD_REQUEST, "요청을 처리할 수 없습니다."),
 
   // Image
   EMPTY_IMAGE_FILE(HttpStatus.BAD_REQUEST, "이미지 파일이 비어 있습니다."),
