@@ -13,26 +13,45 @@ import com.ganzithon.makers.platform.domain.user.domain.Role;
 import com.ganzithon.makers.platform.domain.user.domain.User;
 import com.ganzithon.makers.platform.domain.user.infrastructure.UserRepository;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.annotation.Profile;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Component
+@Profile({"local", "dev"})
 @RequiredArgsConstructor
 public class DataSeeder implements ApplicationRunner {
 
   private static final String THUMBNAIL_URL =
       "https://kr.object.ncloudstorage.com/ganzithon-makers/thumnail.png";
 
+  private static final Zone[] ZONE_ORDER = {Zone.ZONE1, Zone.ZONE2, Zone.ZONE3};
+  private static final String[] ZONE_FLOORS = {"본관 3층", "신관 2층", "신관 1층"};
+
+  private static final String[] SURNAMES =
+      {"김", "이", "박", "최", "정", "강", "조", "윤", "장", "임"};
+  private static final String[] GIVEN_NAMES =
+      {"서연", "준혁", "민수", "지우", "다은", "현우", "소영", "태웅", "채린", "민재",
+          "예진", "도현", "수아", "성민", "하늘", "유진", "재민", "서윤", "지훈", "태리"};
+
   private final ProjectRepository projectRepository;
   private final BoothRepository boothRepository;
   private final TimetableRepository timetableRepository;
   private final UserRepository userRepository;
+  private final PasswordEncoder passwordEncoder;
+
+  @Value("${seed.password:seed_password}")
+  private String seedPassword;
 
   @Override
   @Transactional
@@ -165,19 +184,15 @@ public class DataSeeder implements ApplicationRunner {
         .toList();
     projectRepository.saveAll(projects);
 
-    Zone[] zones = {Zone.ZONE1, Zone.ZONE1, Zone.ZONE1, Zone.ZONE1,
-        Zone.ZONE2, Zone.ZONE2, Zone.ZONE2,
-        Zone.ZONE3, Zone.ZONE3, Zone.ZONE3};
-    String[] rooms = {"본관 301호", "본관 301호", "본관 302호", "본관 302호",
-        "신관 201호", "신관 201호", "신관 202호",
-        "신관 101호", "신관 101호", "신관 102호"};
-
-    List<Booth> booths = new java.util.ArrayList<>();
+    // 팀마다 구역/자리가 다르도록 구역을 순환 배정하고, 구역 안에서 자리 번호를 올림
+    List<Booth> booths = new ArrayList<>();
     for (int i = 0; i < projects.size(); i++) {
+      int zoneIdx = i % ZONE_ORDER.length;
+      int slot = i / ZONE_ORDER.length + 1;
       booths.add(Booth.create(
           projects.get(i).getId(),
-          zones[i],
-          rooms[i],
+          ZONE_ORDER[zoneIdx],
+          String.format("%s %d번 테이블", ZONE_FLOORS[zoneIdx], slot),
           i + 1
       ));
     }
@@ -191,47 +206,66 @@ public class DataSeeder implements ApplicationRunner {
       return;
     }
 
-    List<Project> projects = projectRepository.findAll();
+    // 팀 번호가 부스 번호(i + 1)와 항상 일치하도록 id 순으로 고정
+    List<Project> projects = projectRepository.findAll().stream()
+        .sorted(Comparator.comparing(Project::getId))
+        .toList();
     if (projects.isEmpty()) {
       log.info("[DataSeeder] no projects found. skip user seeding.");
       return;
     }
 
-    String[][] memberNames = {
-        {"김서연", "박준혁", "이민수", "최지우", "정다은"},
-        {"오현우", "한소영", "서태웅", "윤채린", "장민재"},
-        {"신예진", "강도현", "임수아", "조성민", "배하늘"},
-        {"권민호", "송유진", "황재민", "문서윤", "안지훈"},
-        {"김태리", "노정민", "류예은", "허승우", "전가연"},
-        {"손우진", "고은서", "남궁현", "심지호", "홍다빈"},
-        {"차민규", "백서현", "우지민", "성동훈", "마예린"},
-        {"염태오", "하윤서", "방시우", "설지원", "편도윤"},
-        {"표건우", "라채원", "석진우", "여하민", "추성빈"},
-        {"모준석", "곽시연", "탁현우", "온유나", "간재희"}
-    };
+    // BCrypt는 의도적으로 느리므로 한 번만 인코딩해서 모든 시드 계정이 같은 해시를 공유
+    String encodedPassword = passwordEncoder.encode(seedPassword);
 
-    List<User> users = new java.util.ArrayList<>();
-    int teamNumber = 1;
+    List<User> users = new ArrayList<>();
+
+    // 0) 백오피스 로그인 테스트용 관리자 계정 (ADMIN / SUPER_ADMIN만 백오피스 로그인 허용)
+    // 주의: User.create의 마지막 인자(teamNumber)가 null을 허용하는지 확인 필요
+    users.add(User.create(
+        "admin",
+        encodedPassword,
+        "관리자",
+        "010-0000-0000",
+        "메이커스대학교",
+        Role.SUPER_ADMIN,
+        null
+    ));
+
     for (int i = 0; i < projects.size(); i++) {
       Project project = projects.get(i);
-      String[] names = memberNames[i % memberNames.length];
+      int teamNumber = i + 1;
       Part clientPart = (project.getPlatform() == Platform.APP) ? Part.APP : Part.WEB;
 
-      Part[] parts = {Part.PLAN, Part.DESIGN, clientPart, clientPart, Part.SERVER};
-      for (int j = 0; j < names.length; j++) {
-        User user = User.create(
+      // 1) 팀 계정: 부스 운영자 (QR 발급)
+      User teamAccount = User.create(
+          String.format("team%02d", teamNumber),
+          encodedPassword,
+          project.getTeamName(),
+          String.format("010-1234-%04d", teamNumber * 10),
+          "메이커스대학교",
+          Role.TEAM,
+          teamNumber
+      );
+      teamAccount.assignToProject(project.getId(), null);
+      users.add(teamAccount);
+
+      // 2) 팀원 6명: 일반 참가자 (스탬프 수집)
+      Part[] parts = {Part.PLAN, Part.DESIGN, clientPart, clientPart, Part.SERVER, Part.SERVER};
+      for (int j = 0; j < parts.length; j++) {
+        User member = User.create(
             String.format("team%02d_%d", teamNumber, j + 1),
-            "seed_password",
-            names[j],
-            String.format("010-1234-%04d", teamNumber * 10 + j),
+            encodedPassword,
+            SURNAMES[(i + j) % SURNAMES.length]
+                + GIVEN_NAMES[(i * parts.length + j) % GIVEN_NAMES.length],
+            String.format("010-1234-%04d", teamNumber * 10 + j + 1),
             "메이커스대학교",
-            Role.TEAM,
+            Role.PARTICIPANT,
             teamNumber
         );
-        user.assignToProject(project.getId(), parts[j]);
-        users.add(user);
+        member.assignToProject(project.getId(), parts[j]);
+        users.add(member);
       }
-      teamNumber++;
     }
 
     userRepository.saveAll(users);
@@ -244,15 +278,25 @@ public class DataSeeder implements ApplicationRunner {
       return;
     }
 
+    // 모든 일정은 앞 일정의 종료 시각 = 다음 일정의 시작 시각 (겹침 없음)
     LocalDateTime base = LocalDateTime.of(2026, 11, 21, 9, 0);
     List<Timetable> timetables = List.of(
-        Timetable.create("참가자 등록 및 입장", "행사장 입구에서 체크인 후 명찰 수령", base, base.plusHours(1)),
-        Timetable.create("오프닝 세레모니", "개회사, 행사 안내, 팀 소개", base.plusHours(1), base.plusHours(2)),
-        Timetable.create("부스 투어 시작", "각 팀 부스 자유 관람 및 스탬프 투어 시작", base.plusHours(2), base.plusHours(6)),
-        Timetable.create("점심 시간", "행사장 1층 라운지에서 도시락 제공", base.plusHours(4), base.plusHours(5)),
-        Timetable.create("팀 발표 세션", "각 팀 5분 발표 + 3분 Q&A", base.plusHours(6), base.plusHours(8)),
-        Timetable.create("인기 투표", "참가자 대상 현장 인기 투표 진행", base.plusHours(8), base.plusMinutes(8 * 60 + 30)),
-        Timetable.create("시상식 및 폐회", "수상팀 발표, 경품 추첨, 단체 사진 촬영", base.plusHours(9), base.plusHours(10))
+        Timetable.create("참가자 등록 및 입장", "행사장 입구에서 체크인 후 명찰 수령",
+            base, base.plusHours(1)),                          // 09:00 ~ 10:00
+        Timetable.create("오프닝 세레모니", "개회사, 행사 안내, 팀 소개",
+            base.plusHours(1), base.plusHours(2)),             // 10:00 ~ 11:00
+        Timetable.create("부스 투어 1부", "각 팀 부스 자유 관람 및 스탬프 투어 시작",
+            base.plusHours(2), base.plusHours(4)),             // 11:00 ~ 13:00
+        Timetable.create("점심 시간", "행사장 1층 라운지에서 도시락 제공",
+            base.plusHours(4), base.plusHours(5)),             // 13:00 ~ 14:00
+        Timetable.create("부스 투어 2부", "각 팀 부스 자유 관람 및 스탬프 투어 마무리",
+            base.plusHours(5), base.plusHours(6)),             // 14:00 ~ 15:00
+        Timetable.create("팀 발표 세션", "각 팀 5분 발표 + 3분 Q&A",
+            base.plusHours(6), base.plusHours(8)),             // 15:00 ~ 17:00
+        Timetable.create("인기 투표", "참가자 대상 현장 인기 투표 진행",
+            base.plusHours(8), base.plusHours(8).plusMinutes(30)), // 17:00 ~ 17:30
+        Timetable.create("시상식 및 폐회", "수상팀 발표, 경품 추첨, 단체 사진 촬영",
+            base.plusHours(9), base.plusHours(10))             // 18:00 ~ 19:00
     );
     timetableRepository.saveAll(timetables);
     log.info("[DataSeeder] seeded {} timetables.", timetables.size());
