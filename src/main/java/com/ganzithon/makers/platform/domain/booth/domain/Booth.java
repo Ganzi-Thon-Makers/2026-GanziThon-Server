@@ -15,7 +15,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "booth", uniqueConstraints = {
-    @UniqueConstraint(name = "uk_booth_project_id", columnNames = "project_id")
+    @UniqueConstraint(name = "uk_booth_project_id", columnNames = "project_id"),
+    @UniqueConstraint(name = "uk_booth_zone_booth_number", columnNames = {"zone", "booth_number"})
 })
 public class Booth extends BaseEntity {
 
@@ -56,5 +57,15 @@ public class Booth extends BaseEntity {
             roomNumber,
             boothNumber
         );
+    }
+
+    // 부스에 프로젝트(팀) 배정. 다른 프로젝트가 배정되어 있으면 교체
+    public void assignProject(Long projectId) {
+        this.projectId = projectId;
+    }
+
+    // 배정 취소 (부스는 유지)
+    public void clearProject() {
+        this.projectId = null;
     }
 }
