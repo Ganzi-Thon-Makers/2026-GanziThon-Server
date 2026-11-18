@@ -2,6 +2,7 @@ package com.ganzithon.makers.platform.domain.user.presentation;
 
 import com.ganzithon.makers.common.dto.SuccessResponse;
 import com.ganzithon.makers.common.exception.ErrorCode;
+import com.ganzithon.makers.common.security.AuthPrincipal;
 import com.ganzithon.makers.common.security.AuthUser;
 import com.ganzithon.makers.common.springdoc.ApiErrorResponse;
 import com.ganzithon.makers.platform.domain.user.presentation.dto.response.MyPageResponse;
@@ -28,5 +29,5 @@ public interface UserApi {
     @ApiErrorResponse(value = ErrorCode.USER_NOT_FOUND, description = "회원을 찾을 수 없거나 TEAM 계정인 경우")
     @GetMapping("/mypage")
     ResponseEntity<SuccessResponse<MyPageResponse>> getMyPage(
-            @Parameter(hidden = true) @AuthUser Long userId);
+            @Parameter(hidden = true) @AuthUser AuthPrincipal principal);
 }
