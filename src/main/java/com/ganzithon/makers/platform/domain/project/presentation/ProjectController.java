@@ -1,6 +1,8 @@
 package com.ganzithon.makers.platform.domain.project.presentation;
 
 import com.ganzithon.makers.common.dto.SuccessResponse;
+import com.ganzithon.makers.common.security.AuthPrincipal;
+import com.ganzithon.makers.common.security.AuthUser;
 import com.ganzithon.makers.platform.domain.booth.domain.Zone;
 import com.ganzithon.makers.platform.domain.project.application.ProjectBoothQueryFacade;
 import com.ganzithon.makers.platform.domain.project.presentation.dto.ProjectDetailResponse;
@@ -22,8 +24,9 @@ public class ProjectController {
   private final ProjectBoothQueryFacade projectBoothQueryFacade;
 
   @GetMapping
-  public ResponseEntity<SuccessResponse<Map<Zone, List<ProjectSummaryResponse>>>> getProjects() {
-    return ResponseEntity.ok(SuccessResponse.of(projectBoothQueryFacade.getProjectsGroupedByZone()));
+  public ResponseEntity<SuccessResponse<Map<Zone, List<ProjectSummaryResponse>>>> getProjects(
+      @AuthUser AuthPrincipal principal) {
+    return ResponseEntity.ok(SuccessResponse.of(projectBoothQueryFacade.getProjectsGroupedByZone(principal.userId())));
   }
 
   @GetMapping("/{projectId}")

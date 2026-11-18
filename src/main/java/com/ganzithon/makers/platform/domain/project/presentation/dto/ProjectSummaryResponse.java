@@ -9,17 +9,19 @@ public record ProjectSummaryResponse(
     String teamName,
     String summary,
     String thumbnailUrl,
-    Platform platform
+    Platform platform,
+    boolean isVoted
 ) {
 
-  public static ProjectSummaryResponse of(Project project) {
+  public static ProjectSummaryResponse of(Project project, boolean isVoted) {
     return new ProjectSummaryResponse(
         project.getId(),
         project.getTitle(),
         project.getTeamName(),
         project.getSummary(),
         project.getThumbnailUrl(),
-        project.getPlatform()
+        project.getPlatform(),
+        isVoted
     );
   }
 }

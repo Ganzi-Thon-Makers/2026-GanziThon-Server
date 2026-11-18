@@ -4,8 +4,10 @@ import com.ganzithon.makers.common.exception.BusinessException;
 import com.ganzithon.makers.common.exception.ErrorCode;
 import com.ganzithon.makers.platform.domain.vote.domain.Vote;
 import com.ganzithon.makers.platform.domain.vote.infrastructure.ProjectVoteCount;
+import com.ganzithon.makers.platform.domain.vote.domain.Vote;
 import com.ganzithon.makers.platform.domain.vote.infrastructure.VoteRepository;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -39,5 +41,10 @@ public class VoteService {
     } catch (DataIntegrityViolationException e) {
       throw new BusinessException(ErrorCode.VOTE_ALREADY_CAST);
     }
+    
+  public Set<Long> findVotedProjectIdsByUserId(Long userId) {
+    return voteRepository.findAllByUserId(userId).stream()
+        .map(Vote::getProjectId)
+        .collect(Collectors.toSet());
   }
 }
