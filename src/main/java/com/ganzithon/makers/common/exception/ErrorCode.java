@@ -32,7 +32,6 @@ public enum ErrorCode {
   PROJECT_MEMBER_ALREADY_ASSIGNED(HttpStatus.CONFLICT, "이미 다른 프로젝트에 소속된 회원입니다."),
 
   // User
-  USER_NOT_FOUND(HttpStatus.NOT_FOUND, "회원을 찾을 수 없습니다."),
   DUPLICATE_LOGIN_ID(HttpStatus.CONFLICT, "이미 사용 중인 아이디입니다."),
 
   // Booth
