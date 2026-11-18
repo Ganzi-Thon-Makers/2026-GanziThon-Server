@@ -19,21 +19,24 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/projects")
 @RequiredArgsConstructor
-public class ProjectController {
+public class ProjectController implements ProjectApi {
 
   private final ProjectBoothQueryFacade projectBoothQueryFacade;
 
+  @Override
   @GetMapping
   public ResponseEntity<SuccessResponse<Map<Zone, List<ProjectSummaryResponse>>>> getProjects(
       @AuthUser AuthPrincipal principal) {
     return ResponseEntity.ok(SuccessResponse.of(projectBoothQueryFacade.getProjectsGroupedByZone(principal.userId())));
   }
 
+  @Override
   @GetMapping("/me")
   public ResponseEntity<SuccessResponse<ProjectDetailResponse>> getMyProject(@AuthUser AuthPrincipal principal) {
     return ResponseEntity.ok(SuccessResponse.of(projectBoothQueryFacade.getMyProject(principal.userId())));
   }
 
+  @Override
   @GetMapping("/{projectId}")
   public ResponseEntity<SuccessResponse<ProjectDetailResponse>> getProjectDetail(@PathVariable Long projectId) {
     return ResponseEntity.ok(SuccessResponse.of(projectBoothQueryFacade.getProjectDetail(projectId)));
