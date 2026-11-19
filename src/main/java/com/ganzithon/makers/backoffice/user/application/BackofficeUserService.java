@@ -1,6 +1,5 @@
 package com.ganzithon.makers.backoffice.user.application;
 
-import com.ganzithon.makers.backoffice.user.presentation.dto.AccountListResponse;
 import com.ganzithon.makers.backoffice.user.presentation.dto.UserCreateRequest;
 import com.ganzithon.makers.backoffice.user.presentation.dto.UserDetailResponse;
 import com.ganzithon.makers.backoffice.user.presentation.dto.UserListResponse;
@@ -21,7 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** 참가자 목록 조회/검색, 전체 계정 조회, 계정(PARTICIPANT, TEAM, ADMIN) 상세 조회, 등록, 수정, 삭제 */
+/** 참가자 목록 조회/검색, 상세 조회, 수정, 삭제 / 계정(PARTICIPANT, TEAM, ADMIN) 등록 */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -33,8 +32,8 @@ public class BackofficeUserService {
   private final VoteService voteService;
   private final StampService stampService;
 
-  // 백오피스에서 관리하는 계정 (SUPER_ADMIN 제외)
-  private static final List<Role> MANAGEABLE_ROLES = List.of(Role.PARTICIPANT, Role.TEAM, Role.ADMIN);
+  // 등록 가능한 계정 (SUPER_ADMIN 제외). 조회·수정·삭제는 PARTICIPANT 만
+  private static final List<Role> CREATABLE_ROLES = List.of(Role.PARTICIPANT, Role.TEAM, Role.ADMIN);
 
   // 관리 대상은 참가자만. 조건이 null 이면 해당 조건은 적용하지 않음
   public List<UserListResponse> getUsers(String keyword, Boolean luckyDrawEntered, Boolean completed) {
@@ -43,21 +42,13 @@ public class BackofficeUserService {
         .toList();
   }
 
-  // 전체 계정 (SUPER_ADMIN 제외). role 이 null 이면 PARTICIPANT, TEAM, ADMIN 모두
-  public List<AccountListResponse> getAccounts(Role role, String keyword) {
-    List<Role> roles = role == null ? MANAGEABLE_ROLES : List.of(validateManageableRole(role));
-    return userService.searchByRoles(roles, keyword).stream()
-        .map(AccountListResponse::of)
-        .toList();
-  }
-
   public UserDetailResponse getUser(Long userId) {
-    return UserDetailResponse.of(getManageable(userId));
+    return UserDetailResponse.of(getParticipant(userId));
   }
 
   @Transactional
   public UserDetailResponse create(UserCreateRequest request) {
-    Fields fields = resolveFields(validateManageableRole(request.role()), request.name(), request.school(),
+    Fields fields = resolveFields(validateCreatableRole(request.role()), request.name(), request.school(),
         request.phoneNumber(), request.teamNumber(), request.part());
     if (userService.existsByLoginId(request.loginId())) {
       throw new BusinessException(ErrorCode.DUPLICATE_LOGIN_ID);
@@ -84,8 +75,8 @@ public class BackofficeUserService {
   // 전체 교체. 비밀번호는 보낸 경우에만 바꾸고, 바꾸면 해당 회원의 로그인 세션을 모두 지움 (강제 로그아웃)
   @Transactional
   public UserDetailResponse update(Long userId, UserUpdateRequest request) {
-    User user = getManageable(userId);
-    // role 은 변경 불가. 기존 role 기준으로 필수 항목 검증
+    User user = getParticipant(userId);
+    // role 은 변경 불가. 참가자 기준으로 필수 항목 검증
     Fields fields = resolveFields(user.getRole(), request.name(), request.school(),
         request.phoneNumber(), request.teamNumber(), request.part());
     if (userService.existsByLoginIdExcept(request.loginId(), userId)) {
@@ -118,28 +109,28 @@ public class BackofficeUserService {
     return UserDetailResponse.of(user);
   }
 
-  // 물리 삭제 (TEAM, ADMIN 포함). 회원의 투표, 스탬프, 로그인 세션도 함께 삭제 (투표했던 프로젝트의 득표수가 줄어듦)
+  // 물리 삭제 (참가자만). 회원의 투표, 스탬프, 로그인 세션도 함께 삭제 (투표했던 프로젝트의 득표수가 줄어듦)
   // 프로젝트 팀원은 users.project_id 로만 연결되어 있어서 따로 처리할 것이 없음
   @Transactional
   public void delete(Long userId) {
-    User user = getManageable(userId);
+    User user = getParticipant(userId);
     voteService.deleteAllByUserId(userId);
     stampService.deleteAllByUserId(userId);
     authService.logoutAll(userId);
     userService.delete(user);
   }
 
-  // SUPER_ADMIN 계정은 관리 대상이 아니므로 없는 회원과 같이 404
-  private User getManageable(Long userId) {
+  // 조회·수정·삭제 대상은 참가자만. TEAM, ADMIN, SUPER_ADMIN 계정은 없는 회원과 같이 404
+  private User getParticipant(Long userId) {
     User user = userService.getById(userId);
-    if (!MANAGEABLE_ROLES.contains(user.getRole())) {
+    if (user.getRole() != Role.PARTICIPANT) {
       throw new BusinessException(ErrorCode.USER_NOT_FOUND);
     }
     return user;
   }
 
-  private Role validateManageableRole(Role role) {
-    if (!MANAGEABLE_ROLES.contains(role)) {
+  private Role validateCreatableRole(Role role) {
+    if (!CREATABLE_ROLES.contains(role)) {
       throw new BusinessException(ErrorCode.INVALID_USER_ROLE);
     }
     return role;
