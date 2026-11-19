@@ -1,13 +1,11 @@
 package com.ganzithon.makers.backoffice.user.presentation;
 
 import com.ganzithon.makers.backoffice.user.application.BackofficeUserService;
-import com.ganzithon.makers.backoffice.user.presentation.dto.AccountListResponse;
 import com.ganzithon.makers.backoffice.user.presentation.dto.UserCreateRequest;
 import com.ganzithon.makers.backoffice.user.presentation.dto.UserDetailResponse;
 import com.ganzithon.makers.backoffice.user.presentation.dto.UserListResponse;
 import com.ganzithon.makers.backoffice.user.presentation.dto.UserUpdateRequest;
 import com.ganzithon.makers.common.dto.SuccessResponse;
-import com.ganzithon.makers.platform.domain.user.domain.Role;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,8 +24,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "Backoffice - 사용자 관리", description = "목록 조회는 참가자만, 상세·등록·수정·삭제와 전체 계정 조회는 "
-    + "PARTICIPANT, TEAM, ADMIN 대상 (SUPER_ADMIN 제외)")
+@Tag(name = "Backoffice - 사용자 관리", description = "목록·상세 조회, 수정, 삭제는 참가자(PARTICIPANT)만, "
+    + "등록은 PARTICIPANT, TEAM, ADMIN 가능 (SUPER_ADMIN 제외)")
 @RestController
 @RequestMapping("/backoffice/api/v1/users")
 @RequiredArgsConstructor
@@ -53,23 +51,8 @@ public class BackofficeUserController {
   }
 
   @Operation(
-      summary = "전체 계정 조회",
-      description = "PARTICIPANT, TEAM, ADMIN 계정을 이름 가나다순으로 조회합니다. (SUPER_ADMIN 제외) "
-          + "role 로 걸러 볼 수 있고, 생략하면 세 role 모두 조회합니다. role=SUPER_ADMIN 은 400입니다. "
-          + "페이지네이션 없이 전체를 반환합니다.")
-  @GetMapping("/accounts")
-  public ResponseEntity<SuccessResponse<List<AccountListResponse>>> getAccounts(
-      @Parameter(description = "PARTICIPANT, TEAM, ADMIN 중 하나 (생략 시 전체)")
-      @RequestParam(required = false) Role role,
-      @Parameter(description = "이름 검색어 (일부 일치)", example = "김")
-      @RequestParam(required = false) String keyword
-  ) {
-    return ResponseEntity.ok(SuccessResponse.of(backofficeUserService.getAccounts(role, keyword)));
-  }
-
-  @Operation(
-      summary = "계정 상세 조회",
-      description = "PARTICIPANT, TEAM, ADMIN 계정을 조회합니다. SUPER_ADMIN 계정은 404입니다. "
+      summary = "참가자 상세 조회",
+      description = "참가자(PARTICIPANT) 계정만 조회합니다. TEAM, ADMIN, SUPER_ADMIN 계정은 404입니다. "
           + "비밀번호는 응답하지 않습니다. (수정에서 재설정만 가능)")
   @GetMapping("/{userId}")
   public ResponseEntity<SuccessResponse<UserDetailResponse>> getUser(@PathVariable Long userId) {
@@ -94,10 +77,10 @@ public class BackofficeUserController {
   }
 
   @Operation(
-      summary = "계정 수정 (SUPER_ADMIN 전용)",
-      description = "전체 교체 방식이라 상세 조회 값으로 채운 폼 전체를 보냅니다. "
-          + "role 은 변경할 수 없고, 대상 계정의 role 기준으로 등록과 같은 필수 항목 규칙을 적용합니다. "
-          + "(TEAM 은 아이디, 팀 번호만 필요하며 이름은 \"N팀\" 으로 갱신) "
+      summary = "참가자 수정 (SUPER_ADMIN 전용)",
+      description = "참가자(PARTICIPANT) 계정만 수정합니다. TEAM, ADMIN, SUPER_ADMIN 계정은 404입니다. "
+          + "전체 교체 방식이라 상세 조회 값으로 채운 폼 전체를 보냅니다. "
+          + "role 은 변경할 수 없고, 등록의 PARTICIPANT 와 같은 필수 항목 규칙을 적용합니다. "
           + "비밀번호는 바꿀 때만 보내고, 바꾸지 않으면 password 를 빼거나 null 로 보냅니다. (빈 문자열은 400) "
           + "비밀번호를 바꾸면 해당 참가자는 로그아웃됩니다. "
           + "다른 회원이 쓰는 아이디면 409이므로, Swagger 예시의 loginId 는 대상 회원의 아이디로 바꿔서 테스트하세요. "
@@ -111,10 +94,9 @@ public class BackofficeUserController {
   }
 
   @Operation(
-      summary = "계정 삭제 (SUPER_ADMIN 전용)",
-      description = "PARTICIPANT, TEAM, ADMIN 계정을 삭제합니다. (SUPER_ADMIN 계정은 404) 되돌릴 수 없습니다. "
-          + "해당 계정의 투표·스탬프·로그인 세션도 함께 삭제되어, 투표했던 프로젝트의 득표수가 줄어듭니다. "
-          + "TEAM 계정을 삭제하면 그 프로젝트(부스)의 QR 발급용 연결도 사라집니다.")
+      summary = "참가자 삭제 (SUPER_ADMIN 전용)",
+      description = "참가자(PARTICIPANT) 계정만 삭제합니다. TEAM, ADMIN, SUPER_ADMIN 계정은 404입니다. 되돌릴 수 없습니다. "
+          + "해당 참가자의 투표·스탬프·로그인 세션도 함께 삭제되어, 투표했던 프로젝트의 득표수가 줄어듭니다.")
   @DeleteMapping("/{userId}")
   public ResponseEntity<SuccessResponse<Void>> delete(@PathVariable Long userId) {
     backofficeUserService.delete(userId);
