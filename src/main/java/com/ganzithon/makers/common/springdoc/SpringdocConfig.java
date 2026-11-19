@@ -9,7 +9,9 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
+import java.util.List;
 import org.springdoc.core.models.GroupedOpenApi;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -56,11 +58,14 @@ public class SpringdocConfig {
   }
 
   @Bean
-  public GroupedOpenApi backofficeApi() {
+  public GroupedOpenApi backofficeApi(
+          @Value("${app.swagger.backoffice-server-url:/}") String backofficeServerUrl) {
     return GroupedOpenApi.builder()
             .group("backoffice")
             .displayName("BackOffice API")
             .packagesToScan("com.ganzithon.makers.backoffice")
+            .addOpenApiCustomizer(openApi ->
+                    openApi.servers(List.of(new Server().url(backofficeServerUrl))))
             .build();
   }
 }
