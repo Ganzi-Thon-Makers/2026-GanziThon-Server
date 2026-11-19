@@ -81,10 +81,11 @@ public class BackofficeBoothService {
   }
 
   // 배정 또는 교체. 같은 프로젝트를 다시 배정하면 그대로 성공
+  // 프로젝트 행 락을 먼저 잡아 프로젝트 삭제와 직렬화한다 (삭제가 먼저면 404, 배정이 먼저면 삭제가 부스를 비움)
   @Transactional
   public BoothAssignResponse assignProject(Long boothId, Long projectId) {
+    Project project = projectService.getByIdForUpdate(projectId);
     Booth booth = boothService.findById(boothId);
-    Project project = projectService.findById(projectId);
 
     boolean assignedElsewhere = boothService.findAssignedProjectIds().contains(projectId)
         && !projectId.equals(booth.getProjectId());

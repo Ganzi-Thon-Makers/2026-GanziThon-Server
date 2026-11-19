@@ -21,6 +21,12 @@ public class ProjectService {
         .orElseThrow(() -> new BusinessException(ErrorCode.PROJECT_NOT_FOUND));
   }
 
+  // 프로젝트 행 락. 호출한 쪽 트랜잭션이 끝날 때까지 유지된다 (삭제와 부스 배정 직렬화)
+  public Project getByIdForUpdate(Long projectId) {
+    return projectRepository.findByIdForUpdate(projectId)
+        .orElseThrow(() -> new BusinessException(ErrorCode.PROJECT_NOT_FOUND));
+  }
+
   public List<Project> findAll() {
     return projectRepository.findAll();
   }
