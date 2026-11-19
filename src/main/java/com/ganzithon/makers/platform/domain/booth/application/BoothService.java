@@ -7,6 +7,9 @@ import com.ganzithon.makers.platform.domain.booth.application.dto.BoothInfo;
 import com.ganzithon.makers.platform.domain.booth.domain.Booth;
 import com.ganzithon.makers.platform.domain.booth.infrastructure.BoothRepository;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import com.ganzithon.makers.platform.domain.booth.presentation.response.BoothDetailResponse;
 import com.ganzithon.makers.platform.domain.booth.presentation.response.BoothListResponse;
@@ -26,11 +29,26 @@ public class BoothService {
 
   //부스 전체 조회
   public BoothListResponse getBoothsAll() {
-    List<BoothInfo> getBooths =  boothRepository.findAll()
-            .stream()
-            .map(BoothInfo::from)
+
+    List<Booth> booths = boothRepository.findAll();
+
+    List<Long> projectIds = booths.stream()
+            .map(Booth::getProjectId)
+            .filter(Objects::nonNull)
             .toList();
-    return BoothListResponse.from(getBooths);
+
+    Map<Long, Integer> teamNumberByProjectId = projectRepository.findAllById(projectIds)
+            .stream()
+            .collect(Collectors.toMap(Project::getId, Project::getTeamNumber));
+
+
+    List<BoothInfo> boothInfos = booths.stream()
+            .map(booth -> BoothInfo.of(
+                    booth,
+                    teamNumberByProjectId.get(booth.getProjectId())))   // 미배정이면 null
+            .toList();
+
+    return BoothListResponse.from(boothInfos);
   }
 
   //부스 상세 조회
