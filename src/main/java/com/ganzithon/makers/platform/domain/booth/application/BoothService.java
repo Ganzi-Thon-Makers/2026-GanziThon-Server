@@ -6,7 +6,11 @@ import com.ganzithon.makers.platform.domain.booth.application.dto.BoothDetailInf
 import com.ganzithon.makers.platform.domain.booth.application.dto.BoothInfo;
 import com.ganzithon.makers.platform.domain.booth.domain.Booth;
 import com.ganzithon.makers.platform.domain.booth.infrastructure.BoothRepository;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import com.ganzithon.makers.platform.domain.booth.presentation.response.BoothDetailResponse;
 import com.ganzithon.makers.platform.domain.booth.presentation.response.BoothListResponse;
@@ -26,11 +30,27 @@ public class BoothService {
 
   //부스 전체 조회
   public BoothListResponse getBoothsAll() {
-    List<BoothInfo> getBooths =  boothRepository.findAll()
-            .stream()
-            .map(BoothInfo::from)
+
+    List<Booth> booths = boothRepository.findAll();
+
+    List<Long> projectIds = booths.stream()
+            .map(Booth::getProjectId)
+            .filter(Objects::nonNull)
             .toList();
-    return BoothListResponse.from(getBooths);
+
+    // toMap은 value가 null이면 NPE라서, 팀 번호 미정 프로젝트를 허용하는 HashMap으로 수집
+    Map<Long, Integer> teamNumberByProjectId = new HashMap<>();
+    projectRepository.findAllById(projectIds)
+            .forEach(p -> teamNumberByProjectId.put(p.getId(), p.getTeamNumber()));
+
+
+    List<BoothInfo> boothInfos = booths.stream()
+            .map(booth -> BoothInfo.of(
+                    booth,
+                    teamNumberByProjectId.get(booth.getProjectId())))   // 미배정이면 null
+            .toList();
+
+    return BoothListResponse.from(boothInfos);
   }
 
   //부스 상세 조회

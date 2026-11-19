@@ -44,10 +44,10 @@ class BoothControllerTest {
     void returnsBoothsGroupedByZone() throws Exception {
       Map<String, List<BoothListResponse.BoothResponse>> booths = new TreeMap<>();
       booths.put("ZONE1", List.of(
-          new BoothListResponse.BoothResponse(1L, "본관 301호", 1),
-          new BoothListResponse.BoothResponse(2L, "본관 301호", 2)));
+          new BoothListResponse.BoothResponse(1L, "본관 301호", 1, 3),
+          new BoothListResponse.BoothResponse(2L, "본관 301호", 2, 4)));
       booths.put("ZONE2", List.of(
-          new BoothListResponse.BoothResponse(5L, "신관 201호", 5)));
+          new BoothListResponse.BoothResponse(5L, "신관 201호", 5, null)));
 
       when(boothService.getBoothsAll()).thenReturn(new BoothListResponse(booths));
 
@@ -58,6 +58,7 @@ class BoothControllerTest {
           .andExpect(jsonPath("$.data.booths.ZONE1[0].boothId").value(1))
           .andExpect(jsonPath("$.data.booths.ZONE1[0].roomNumber").value("본관 301호"))
           .andExpect(jsonPath("$.data.booths.ZONE1[0].boothNumber").value(1))
+          .andExpect(jsonPath("$.data.booths.ZONE1[0].teamNumber").value(3))
           .andExpect(jsonPath("$.data.booths.ZONE2[0].boothNumber").value(5));
     }
 
