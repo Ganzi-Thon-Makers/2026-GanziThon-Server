@@ -21,6 +21,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.util.ReflectionTestUtils;
 
 class BoothServiceTest {
 
@@ -37,6 +38,42 @@ class BoothServiceTest {
 
   private Booth booth(Zone zone, String roomNumber, int boothNumber) {
     return Booth.create(null, zone, roomNumber, boothNumber);
+  }
+
+  private Booth booth(Long projectId, Zone zone, String roomNumber, int boothNumber) {
+    return Booth.create(projectId, zone, roomNumber, boothNumber);
+  }
+
+  private Project projectWithId(Long id, int teamNumber) {
+    Project project = Project.create(
+        "서비스 제목",
+        "팀 이름",
+        teamNumber,
+        "한줄 소개",
+        "상세 설명",
+        "https://service.example.com",
+        "https://cdn.example.com/thumb.png",
+        "SPRING, REACT",
+        Platform.WEB
+    );
+    ReflectionTestUtils.setField(project, "id", id);
+    return project;
+  }
+
+  private Project projectWithNullTeamNumber(Long id) {
+    Project project = Project.create(
+        "서비스 제목",
+        "팀 이름",
+        null,
+        "한줄 소개",
+        "상세 설명",
+        "https://service.example.com",
+        "https://cdn.example.com/thumb.png",
+        "SPRING, REACT",
+        Platform.WEB
+    );
+    ReflectionTestUtils.setField(project, "id", id);
+    return project;
   }
 
   private Project project() {
@@ -75,16 +112,45 @@ class BoothServiceTest {
     }
 
     @Test
-    @DisplayName("부스 항목에는 호수와 부스 번호가 포함된다")
-    void containsRoomNumberAndBoothNumber() {
+    @DisplayName("부스 항목에는 호수, 부스 번호, 팀 번호가 포함된다")
+    void containsRoomNumberBoothNumberAndTeamNumber() {
       when(boothRepository.findAll()).thenReturn(List.of(
-          booth(Zone.ZONE1, "본관 301호", 1)));
+          booth(10L, Zone.ZONE1, "본관 301호", 1)));
+      when(projectRepository.findAllById(List.of(10L)))
+          .thenReturn(List.of(projectWithId(10L, 7)));
 
       BoothListResponse response = boothService.getBoothsAll();
 
       BoothListResponse.BoothResponse booth = response.booths().get("ZONE1").get(0);
       assertThat(booth.roomNumber()).isEqualTo("본관 301호");
       assertThat(booth.boothNumber()).isEqualTo(1);
+      assertThat(booth.teamNumber()).isEqualTo(7);
+    }
+
+    @Test
+    @DisplayName("프로젝트가 배정되지 않은 부스는 팀 번호가 null이다")
+    void unassignedBoothHasNullTeamNumber() {
+      when(boothRepository.findAll()).thenReturn(List.of(
+          booth(Zone.ZONE1, "본관 301호", 1)));
+
+      BoothListResponse response = boothService.getBoothsAll();
+
+      BoothListResponse.BoothResponse booth = response.booths().get("ZONE1").get(0);
+      assertThat(booth.teamNumber()).isNull();
+    }
+
+    @Test
+    @DisplayName("팀 번호가 없는 프로젝트가 배정된 부스도 팀 번호 null로 반환된다")
+    void projectWithoutTeamNumberHasNullTeamNumber() {
+      when(boothRepository.findAll()).thenReturn(List.of(
+          booth(10L, Zone.ZONE1, "본관 301호", 1)));
+      when(projectRepository.findAllById(List.of(10L)))
+          .thenReturn(List.of(projectWithNullTeamNumber(10L)));
+
+      BoothListResponse response = boothService.getBoothsAll();
+
+      BoothListResponse.BoothResponse booth = response.booths().get("ZONE1").get(0);
+      assertThat(booth.teamNumber()).isNull();
     }
 
     @Test

@@ -6,10 +6,11 @@ import com.ganzithon.makers.platform.domain.booth.application.dto.BoothDetailInf
 import com.ganzithon.makers.platform.domain.booth.application.dto.BoothInfo;
 import com.ganzithon.makers.platform.domain.booth.domain.Booth;
 import com.ganzithon.makers.platform.domain.booth.infrastructure.BoothRepository;
+
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import com.ganzithon.makers.platform.domain.booth.presentation.response.BoothDetailResponse;
 import com.ganzithon.makers.platform.domain.booth.presentation.response.BoothListResponse;
@@ -37,9 +38,10 @@ public class BoothService {
             .filter(Objects::nonNull)
             .toList();
 
-    Map<Long, Integer> teamNumberByProjectId = projectRepository.findAllById(projectIds)
-            .stream()
-            .collect(Collectors.toMap(Project::getId, Project::getTeamNumber));
+    // toMap은 value가 null이면 NPE라서, 팀 번호 미정 프로젝트를 허용하는 HashMap으로 수집
+    Map<Long, Integer> teamNumberByProjectId = new HashMap<>();
+    projectRepository.findAllById(projectIds)
+            .forEach(p -> teamNumberByProjectId.put(p.getId(), p.getTeamNumber()));
 
 
     List<BoothInfo> boothInfos = booths.stream()
