@@ -8,8 +8,9 @@ import java.time.LocalDateTime;
 
 public record TimetableCreateRequest(
 
+    // 원시 boolean 이면 필드를 생략했을 때 역직렬화가 실패해(Jackson 3 기본 설정) 래퍼 타입으로 받고 null 은 false 로 바꿈
     @Schema(description = "투표 일정 여부 (생략 시 false). 투표 일정은 하나만 등록 가능", example = "false")
-    boolean isVote,
+    Boolean isVote,
 
     @Schema(description = "제목", example = "오프닝 및 오리엔테이션")
     @NotBlank(message = "제목은 필수입니다.")
@@ -27,4 +28,10 @@ public record TimetableCreateRequest(
     @NotNull(message = "종료시간은 필수입니다.")
     LocalDateTime endTime
 ) {
+
+  public TimetableCreateRequest {
+    if (isVote == null) {
+      isVote = false;
+    }
+  }
 }
