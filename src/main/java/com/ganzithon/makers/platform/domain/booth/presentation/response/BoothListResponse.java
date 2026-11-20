@@ -30,13 +30,15 @@ public record BoothListResponse(
     public record BoothResponse(
             Long boothId,
             String roomNumber,
-            Integer boothNumber
+            Integer boothNumber,
+            Integer teamNumber
     ) {
         public static BoothResponse from(BoothInfo info) {
             return new BoothResponse(
                     info.boothId(),
                     info.roomNumber(),
-                    info.boothNumber()
+                    info.boothNumber(),
+                    info.teamNumber()
             );
         }
     }

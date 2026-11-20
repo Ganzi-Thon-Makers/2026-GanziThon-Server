@@ -6,14 +6,16 @@ public record BoothInfo(
         Long boothId,
         String zone,
         String roomNumber,
-        Integer boothNumber
+        Integer boothNumber,
+        Integer teamNumber
 ) {
-    public static BoothInfo from(Booth booth) {
+    public static BoothInfo of(Booth booth, Integer teamNumber) {
         return new BoothInfo(
                 booth.getId(),
                 booth.getZone().name(),
                 booth.getRoomNumber(),
-                booth.getBoothNumber()
+                booth.getBoothNumber(),
+                teamNumber
         );
     }
 }
