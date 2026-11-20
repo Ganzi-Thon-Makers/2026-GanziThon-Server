@@ -1,9 +1,10 @@
 package com.ganzithon.makers.backoffice.booth.presentation;
 
 import com.ganzithon.makers.backoffice.booth.application.BackofficeBoothService;
-import com.ganzithon.makers.backoffice.booth.presentation.dto.BoothAssignResponse;
 import com.ganzithon.makers.backoffice.booth.presentation.dto.BoothProjectAssignRequest;
 import com.ganzithon.makers.backoffice.booth.presentation.dto.BoothProjectResponse;
+import com.ganzithon.makers.backoffice.booth.presentation.dto.BoothResponse;
+import com.ganzithon.makers.backoffice.booth.presentation.dto.BoothUpdateRequest;
 import com.ganzithon.makers.backoffice.booth.presentation.dto.BoothZoneResponse;
 import com.ganzithon.makers.common.dto.SuccessResponse;
 import com.ganzithon.makers.platform.domain.booth.domain.Zone;
@@ -23,7 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "Backoffice - 부스 관리", description = "프로젝트(팀) 배정 / 교체 / 취소")
+@Tag(name = "Backoffice - 부스 관리", description = "부스 정보 수정, 프로젝트(팀) 배정 / 교체 / 취소")
 @RestController
 @RequestMapping("/backoffice/api/v1/booths")
 @RequiredArgsConstructor
@@ -34,7 +35,8 @@ public class BackofficeBoothController {
   @Operation(
       summary = "부스 현황 조회",
       description = "구역별로 호수 단위로 묶어 조회합니다. 구역 → 호수 → 부스 번호 순입니다. "
-          + "project 는 배정된 프로젝트(팀)이며, 비어 있으면 null 입니다. zone 을 생략하면 전체 구역을 조회합니다.")
+          + "project 는 배정된 프로젝트(팀)이며, 비어 있으면 미배정(null)입니다. location 은 위치 설명이며 없으면 null 입니다. "
+          + "zone 을 생략하면 전체 구역을 조회합니다.")
   @GetMapping
   public ResponseEntity<SuccessResponse<List<BoothZoneResponse>>> getBooths(
       @Parameter(description = "구역 (생략 시 전체)", example = "ZONE1")
@@ -61,11 +63,24 @@ public class BackofficeBoothController {
           + "같은 프로젝트를 다시 배정하면 그대로 성공합니다. "
           + "부스나 프로젝트가 없으면 404, 이미 다른 부스에 배정된 프로젝트면 409입니다.")
   @PutMapping("/{boothId}/project")
-  public ResponseEntity<SuccessResponse<BoothAssignResponse>> assignProject(
+  public ResponseEntity<SuccessResponse<BoothResponse>> assignProject(
       @PathVariable Long boothId,
       @Valid @RequestBody BoothProjectAssignRequest request
   ) {
     return ResponseEntity.ok(SuccessResponse.of(backofficeBoothService.assignProject(boothId, request.projectId())));
+  }
+
+  @Operation(
+      summary = "부스 정보 수정",
+      description = "구역, 호수, 부스 번호, 위치, 배정 팀을 한 번에 바꿉니다. 전체 교체 방식이라 바꾸지 않는 항목도 현재 값을 보냅니다. "
+          + "projectId 를 null 로 보내면 배정이 취소됩니다. "
+          + "부스나 프로젝트가 없으면 404, 같은 구역에 같은 부스 번호가 있거나 이미 다른 부스에 배정된 프로젝트면 409입니다.")
+  @PutMapping("/{boothId}")
+  public ResponseEntity<SuccessResponse<BoothResponse>> update(
+      @Parameter(description = "부스 id", example = "1") @PathVariable Long boothId,
+      @Valid @RequestBody BoothUpdateRequest request
+  ) {
+    return ResponseEntity.ok(SuccessResponse.of(backofficeBoothService.update(boothId, request)));
   }
 
   @Operation(

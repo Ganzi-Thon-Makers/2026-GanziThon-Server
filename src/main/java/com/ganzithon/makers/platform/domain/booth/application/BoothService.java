@@ -87,6 +87,11 @@ public class BoothService {
         : boothRepository.findAllByZoneOrderByBoothNumberAsc(zone);
   }
 
+  // 같은 구역에 같은 부스 번호가 (자기 자신 제외) 이미 있는지
+  public boolean existsByZoneAndBoothNumberExcept(Zone zone, Integer boothNumber, Long boothId) {
+    return boothRepository.existsByZoneAndBoothNumberAndIdNot(zone, boothNumber, boothId);
+  }
+
   // 부스가 배정된 프로젝트 id 목록
   public List<Long> findAssignedProjectIds() {
     return boothRepository.findAssignedProjectIds();

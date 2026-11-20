@@ -19,6 +19,8 @@ public interface BoothRepository extends JpaRepository<Booth, Long> {
 
   List<Booth> findAllByZoneOrderByBoothNumberAsc(Zone zone);
 
+  boolean existsByZoneAndBoothNumberAndIdNot(Zone zone, Integer boothNumber, Long id);
+
   @Query("select b.projectId from Booth b where b.projectId is not null")
   List<Long> findAssignedProjectIds();
 

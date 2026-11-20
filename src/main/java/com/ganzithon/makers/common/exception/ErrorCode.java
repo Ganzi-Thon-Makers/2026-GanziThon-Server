@@ -42,6 +42,7 @@ public enum ErrorCode {
   // Booth
   BOOTH_NOT_FOUND(HttpStatus.NOT_FOUND, "부스를 찾을 수 없습니다."),
   PROJECT_ALREADY_ASSIGNED_TO_BOOTH(HttpStatus.CONFLICT, "이미 다른 부스에 배정된 프로젝트입니다."),
+  DUPLICATE_BOOTH_NUMBER(HttpStatus.CONFLICT, "같은 구역에 이미 있는 부스 번호입니다."),
 
   // Timetable
   TIMETABLE_NOT_FOUND(HttpStatus.NOT_FOUND, "일정을 찾을 수 없습니다."),

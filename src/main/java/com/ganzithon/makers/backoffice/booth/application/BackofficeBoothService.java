@@ -1,6 +1,7 @@
 package com.ganzithon.makers.backoffice.booth.application;
 
-import com.ganzithon.makers.backoffice.booth.presentation.dto.BoothAssignResponse;
+import com.ganzithon.makers.backoffice.booth.presentation.dto.BoothResponse;
+import com.ganzithon.makers.backoffice.booth.presentation.dto.BoothUpdateRequest;
 import com.ganzithon.makers.backoffice.booth.presentation.dto.BoothProjectResponse;
 import com.ganzithon.makers.backoffice.booth.presentation.dto.BoothZoneResponse;
 import com.ganzithon.makers.common.exception.BusinessException;
@@ -56,6 +57,7 @@ public class BackofficeBoothService {
             .add(new BoothZoneResponse.BoothItem(
                 booth.getId(),
                 booth.getBoothNumber(),
+                booth.getLocation(),
                 BoothProjectResponse.of(booth.getProjectId() == null ? null : projects.get(booth.getProjectId()))));
       }
       List<BoothZoneResponse.Room> rooms = byRoom.entrySet().stream()
@@ -83,24 +85,37 @@ public class BackofficeBoothService {
   // 배정 또는 교체. 같은 프로젝트를 다시 배정하면 그대로 성공
   // 프로젝트 행 락을 먼저 잡아 프로젝트 삭제와 직렬화한다 (삭제가 먼저면 404, 배정이 먼저면 삭제가 부스를 비움)
   @Transactional
-  public BoothAssignResponse assignProject(Long boothId, Long projectId) {
+  public BoothResponse assignProject(Long boothId, Long projectId) {
     Project project = projectService.getByIdForUpdate(projectId);
     Booth booth = boothService.findById(boothId);
-
-    boolean assignedElsewhere = boothService.findAssignedProjectIds().contains(projectId)
-        && !projectId.equals(booth.getProjectId());
-    if (assignedElsewhere) {
-      throw new BusinessException(ErrorCode.PROJECT_ALREADY_ASSIGNED_TO_BOOTH);
-    }
+    validateNotAssignedElsewhere(booth, projectId);
 
     booth.assignProject(projectId);
-    try {
-      boothService.saveAndFlush(booth);
-    } catch (DataIntegrityViolationException e) {
-      // 동시 요청으로 위 확인을 함께 통과한 경우, DB UNIQUE 제약(project_id)이 막는다
-      throw new BusinessException(ErrorCode.PROJECT_ALREADY_ASSIGNED_TO_BOOTH);
+    saveAndFlush(booth);
+    return BoothResponse.of(booth, project);
+  }
+
+  // 부스 정보 전체 교체 (팀 배정 포함). projectId 가 null 이면 배정 취소
+  // 프로젝트를 배정할 때는 배정과 같이 프로젝트 행 락을 먼저 잡는다 (프로젝트 삭제와 직렬화)
+  @Transactional
+  public BoothResponse update(Long boothId, BoothUpdateRequest request) {
+    Project project = request.projectId() == null ? null : projectService.getByIdForUpdate(request.projectId());
+    Booth booth = boothService.findById(boothId);
+    if (boothService.existsByZoneAndBoothNumberExcept(request.zone(), request.boothNumber(), boothId)) {
+      throw new BusinessException(ErrorCode.DUPLICATE_BOOTH_NUMBER);
     }
-    return BoothAssignResponse.of(booth, project);
+    if (project != null) {
+      validateNotAssignedElsewhere(booth, project.getId());
+    }
+
+    booth.update(request.zone(), request.roomNumber().strip(), request.boothNumber(), blankToNull(request.location()));
+    if (project == null) {
+      booth.clearProject();
+    } else {
+      booth.assignProject(project.getId());
+    }
+    saveAndFlush(booth);
+    return BoothResponse.of(booth, project);
   }
 
   // 배정 취소. 이미 비어 있어도 성공
@@ -108,6 +123,31 @@ public class BackofficeBoothService {
   public void unassignProject(Long boothId) {
     Booth booth = boothService.findById(boothId);
     booth.clearProject();
+  }
+
+  private void validateNotAssignedElsewhere(Booth booth, Long projectId) {
+    boolean assignedElsewhere = boothService.findAssignedProjectIds().contains(projectId)
+        && !projectId.equals(booth.getProjectId());
+    if (assignedElsewhere) {
+      throw new BusinessException(ErrorCode.PROJECT_ALREADY_ASSIGNED_TO_BOOTH);
+    }
+  }
+
+  // 동시 요청으로 위 확인을 함께 통과한 경우 DB UNIQUE 제약이 막는다. 어느 제약인지는 제약 이름으로 구분
+  private void saveAndFlush(Booth booth) {
+    try {
+      boothService.saveAndFlush(booth);
+    } catch (DataIntegrityViolationException e) {
+      String message = String.valueOf(e.getMostSpecificCause().getMessage());
+      if (message.contains("uk_booth_zone_booth_number")) {
+        throw new BusinessException(ErrorCode.DUPLICATE_BOOTH_NUMBER);
+      }
+      throw new BusinessException(ErrorCode.PROJECT_ALREADY_ASSIGNED_TO_BOOTH);
+    }
+  }
+
+  private static String blankToNull(String value) {
+    return value == null || value.isBlank() ? null : value.strip();
   }
 
   private Map<Long, Project> findProjects(List<Long> projectIds) {

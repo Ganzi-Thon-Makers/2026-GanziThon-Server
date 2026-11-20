@@ -20,6 +20,7 @@ public record BoothZoneResponse(
   public record BoothItem(
       Long boothId,
       Integer boothNumber,
+      String location,
       BoothProjectResponse project
   ) {
   }
