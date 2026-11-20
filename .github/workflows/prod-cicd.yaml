@@ -1,0 +1,135 @@
+name: PROD CICD
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Build and Test
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: test_root_password
+          MYSQL_DATABASE: ganzithon_test
+          MYSQL_USER: test_user
+          MYSQL_PASSWORD: test_password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -ptest_root_password --silent"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+          --health-start-period=30s
+
+    env:
+      SPRING_PROFILES_ACTIVE: test
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+
+      - name: Grant Gradle permission
+        run: chmod +x gradlew
+
+      - name: Build and Test
+        run: ./gradlew clean build --no-daemon
+
+  deploy:
+    name: Deploy to NCP PROD
+    if: github.event_name != 'pull_request'
+    environment: production
+
+    runs-on:
+      - self-hosted
+      - linux
+      - x64
+      - ncp-prod
+
+    timeout-minutes: 30
+
+    concurrency:
+      group: deploy-prod
+      cancel-in-progress: false
+
+    steps:
+      # 1. 배포 대상 코드 체크아웃
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      # 2. Docker 실행 환경 확인
+      - name: Check Docker
+        run: |
+          docker version
+          docker compose version
+          jq --version
+
+      # 3. GitHub Secrets 검증 (deploy.sh 내부에서도 재검증함)
+      - name: Validate deployment secrets
+        env:
+          PROD_DB_URL: ${{ secrets.PROD_DB_URL }}
+          PROD_DB_USER: ${{ secrets.PROD_DB_USER }}
+          PROD_DB_PASSWORD: ${{ secrets.PROD_DB_PASSWORD }}
+          NCP_BUCKET: ${{ secrets.NCP_BUCKET }}
+          NCP_ACCESS_KEY: ${{ secrets.NCP_ACCESS_KEY }}
+          NCP_SECRET_KEY: ${{ secrets.NCP_SECRET_KEY }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        run: |
+          set -euo pipefail
+
+          for var in \
+            PROD_DB_URL \
+            PROD_DB_USER \
+            PROD_DB_PASSWORD \
+            NCP_BUCKET \
+            NCP_ACCESS_KEY \
+            NCP_SECRET_KEY \
+            JWT_SECRET
+          do
+            if [ -z "${!var:-}" ]; then
+              echo "::error::Required secret ${var} is missing"
+              exit 1
+            fi
+          done
+
+          echo "All required deployment secrets are configured"
+
+      # 4. PROD 배포 (blue/green 무중단, 실패 시 자동 롤백)
+      - name: Deploy PROD
+        env:
+          PROD_DB_URL: ${{ secrets.PROD_DB_URL }}
+          PROD_DB_USER: ${{ secrets.PROD_DB_USER }}
+          PROD_DB_PASSWORD: ${{ secrets.PROD_DB_PASSWORD }}
+          NCP_BUCKET: ${{ secrets.NCP_BUCKET }}
+          NCP_ACCESS_KEY: ${{ secrets.NCP_ACCESS_KEY }}
+          NCP_SECRET_KEY: ${{ secrets.NCP_SECRET_KEY }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          PROD_DISCORD_WEBHOOK_URL: ${{ secrets.PROD_DISCORD_WEBHOOK_URL }}
+          PROD_API_DOCS_URL: ${{ secrets.PROD_API_DOCS_URL }}
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+          DEPLOYER: ${{ github.actor }}
+        run: |
+          set -euo pipefail
+          chmod +x deploy/docker/prod/scripts/*.sh
+          bash deploy/docker/prod/scripts/deploy.sh
