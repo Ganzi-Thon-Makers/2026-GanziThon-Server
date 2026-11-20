@@ -5,6 +5,7 @@ import com.ganzithon.makers.common.exception.ErrorCode;
 import com.ganzithon.makers.platform.domain.booth.application.dto.BoothDetailInfo;
 import com.ganzithon.makers.platform.domain.booth.application.dto.BoothInfo;
 import com.ganzithon.makers.platform.domain.booth.domain.Booth;
+import com.ganzithon.makers.platform.domain.booth.domain.Zone;
 import com.ganzithon.makers.platform.domain.booth.infrastructure.BoothRepository;
 
 import java.util.HashMap;
@@ -97,5 +98,28 @@ public class BoothService {
 
   public List<Booth> findAllByIds(List<Long> boothIds) {
     return boothRepository.findAllById(boothIds);
+  }
+
+  // zone 이 null 이면 전체. 구역 → 부스 번호 순
+  public List<Booth> findAllByZone(Zone zone) {
+    return zone == null
+        ? boothRepository.findAllByOrderByZoneAscBoothNumberAsc()
+        : boothRepository.findAllByZoneOrderByBoothNumberAsc(zone);
+  }
+
+  // 같은 구역에 같은 부스 번호가 (자기 자신 제외) 이미 있는지
+  public boolean existsByZoneAndBoothNumberExcept(Zone zone, Integer boothNumber, Long boothId) {
+    return boothRepository.existsByZoneAndBoothNumberAndIdNot(zone, boothNumber, boothId);
+  }
+
+  // 부스가 배정된 프로젝트 id 목록
+  public List<Long> findAssignedProjectIds() {
+    return boothRepository.findAssignedProjectIds();
+  }
+
+  // project_id UNIQUE 위반을 호출한 쪽에서 바로 잡을 수 있도록 즉시 flush
+  @Transactional
+  public Booth saveAndFlush(Booth booth) {
+    return boothRepository.saveAndFlush(booth);
   }
 }

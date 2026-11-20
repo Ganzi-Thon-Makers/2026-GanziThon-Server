@@ -166,9 +166,10 @@ public class BackofficeProjectService {
   }
 
   // 팀원·부스는 연결만 해제하고, 받은 투표는 삭제. 대표 이미지는 커밋 후 삭제 (롤백되면 유지)
+  // 프로젝트 행 락을 먼저 잡아, 동시에 들어온 부스 배정이 삭제된 프로젝트를 가리키지 않게 한다
   @Transactional
   public void delete(Long projectId) {
-    Project project = projectService.findById(projectId);
+    Project project = projectService.getByIdForUpdate(projectId);
     userService.clearProject(projectId);
     boothService.clearProject(projectId);
     voteService.deleteAllByProjectId(projectId);
