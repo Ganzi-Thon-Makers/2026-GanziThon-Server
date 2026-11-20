@@ -28,7 +28,7 @@ services:
       # upstream 파일은 repo 밖에 둔다 — repo 안 파일은 actions/checkout이
       # 매 배포마다 리셋해서 blue/green 상태가 유실된다.
       # deploy.sh가 최초 실행 시 deploy/nginx/prod/upstream-app.conf를 seed한다.
-      - ${HOME}/.ganzithon-prod/upstream-app.conf:/etc/nginx/conf.d/upstream-app.conf:ro
+      - ${HOME}/.ganzithon-prod/upstream-app.conf:/etc/nginx/upstream-app.conf:ro
       # Let's Encrypt SSL 인증서
       - /etc/letsencrypt:/etc/letsencrypt:ro
       # Certbot 인증 경로
