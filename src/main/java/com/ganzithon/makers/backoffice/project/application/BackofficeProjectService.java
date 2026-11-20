@@ -19,6 +19,7 @@ import com.ganzithon.makers.platform.domain.vote.application.VoteService;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -107,7 +108,8 @@ public class BackofficeProjectService {
         request.platform()
     ));
 
-    users.values().forEach(user -> user.joinProject(project.getId()));
+    // 팀원의 팀 번호는 프로젝트 팀 번호로 맞춤
+    users.values().forEach(user -> user.joinProject(project.getId(), project.getTeamNumber()));
 
     return toDetail(project, 0L);
   }
@@ -160,7 +162,11 @@ public class BackofficeProjectService {
         }
       }
     }
-    users.values().forEach(user -> user.joinProject(projectId));
+    // 남아 있는 팀원(유지된 팀 계정 포함)과 새로 연결할 팀원 모두 팀 번호를 프로젝트 팀 번호로 맞춤
+    // (팀 번호가 바뀌었으면 기존 팀원도 함께 바뀜. 빠진 팀원의 팀 번호는 그대로 둠)
+    Map<Long, User> linked = new LinkedHashMap<>(users);
+    userService.findAllByProjectId(projectId).forEach(user -> linked.putIfAbsent(user.getId(), user));
+    linked.values().forEach(user -> user.joinProject(projectId, project.getTeamNumber()));
 
     return toDetail(project, voteService.countByProjectId(projectId));
   }

@@ -142,9 +142,14 @@ public class User extends BaseEntity {
         this.part = part;
     }
 
-    // 파트는 회원 정보라 그대로 두고 소속 프로젝트만 바꿈
-    public void joinProject(Long projectId) {
+    // 파트는 회원 정보라 그대로 두고 소속 프로젝트와 팀 번호를 프로젝트 기준으로 맞춤
+    // 팀 계정은 이름도 "N팀" 으로 맞춤
+    public void joinProject(Long projectId, Integer teamNumber) {
         this.projectId = projectId;
+        this.teamNumber = teamNumber;
+        if (role == Role.TEAM) {
+            this.name = teamNumber + "팀";
+        }
     }
 
     public void leaveProject() {

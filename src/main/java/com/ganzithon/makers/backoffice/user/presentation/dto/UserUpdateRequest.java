@@ -40,7 +40,7 @@ public record UserUpdateRequest(
     String phoneNumber,
 
     // 행사 팀은 1~30팀 (팀 수가 바뀌면 여기와 등록 요청의 범위를 함께 변경)
-    @Schema(description = "필수 (1~30)", example = "1")
+    @Schema(description = "필수 (1~30). 프로젝트에 소속된 참가자는 현재 값 그대로 보내야 함 (바꾸면 400)", example = "1")
     @Min(value = 1, message = "팀 번호는 1~30 사이여야 합니다.")
     @Max(value = 30, message = "팀 번호는 1~30 사이여야 합니다.")
     Integer teamNumber,

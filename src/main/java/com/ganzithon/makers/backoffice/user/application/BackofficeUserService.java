@@ -14,6 +14,7 @@ import com.ganzithon.makers.platform.domain.user.domain.Role;
 import com.ganzithon.makers.platform.domain.user.domain.User;
 import com.ganzithon.makers.platform.domain.vote.application.VoteService;
 import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -76,6 +77,10 @@ public class BackofficeUserService {
   @Transactional
   public UserDetailResponse update(Long userId, UserUpdateRequest request) {
     User user = getParticipant(userId);
+    // 프로젝트 소속 참가자의 팀 번호는 프로젝트 팀 번호를 따르므로 여기서는 바꿀 수 없음 (같은 값은 허용)
+    if (user.getProjectId() != null && !Objects.equals(request.teamNumber(), user.getTeamNumber())) {
+      throw new BusinessException(ErrorCode.TEAM_NUMBER_MANAGED_BY_PROJECT);
+    }
     // role 은 변경 불가. 참가자 기준으로 필수 항목 검증
     Fields fields = resolveFields(user.getRole(), request.name(), request.school(),
         request.phoneNumber(), request.teamNumber(), request.part());

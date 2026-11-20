@@ -81,6 +81,7 @@ public class BackofficeUserController {
       description = "참가자(PARTICIPANT) 계정만 수정합니다. TEAM, ADMIN, SUPER_ADMIN 계정은 404입니다. "
           + "전체 교체 방식이라 상세 조회 값으로 채운 폼 전체를 보냅니다. "
           + "role 은 변경할 수 없고, 등록의 PARTICIPANT 와 같은 필수 항목 규칙을 적용합니다. "
+          + "프로젝트에 소속된 참가자의 팀 번호는 바꿀 수 없습니다 (현재 값과 다르면 400, 프로젝트 수정에서 변경). "
           + "비밀번호는 바꿀 때만 보내고, 바꾸지 않으면 password 를 빼거나 null 로 보냅니다. (빈 문자열은 400) "
           + "비밀번호를 바꾸면 해당 참가자는 로그아웃됩니다. "
           + "다른 회원이 쓰는 아이디면 409이므로, Swagger 예시의 loginId 는 대상 회원의 아이디로 바꿔서 테스트하세요. "

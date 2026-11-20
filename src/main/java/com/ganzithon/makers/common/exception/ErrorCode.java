@@ -38,6 +38,7 @@ public enum ErrorCode {
   DUPLICATE_LOGIN_ID(HttpStatus.CONFLICT, "이미 사용 중인 아이디입니다."),
   INVALID_USER_ROLE(HttpStatus.BAD_REQUEST, "SUPER_ADMIN 은 사용할 수 없는 역할입니다."),
   MISSING_REQUIRED_USER_FIELD(HttpStatus.BAD_REQUEST, "역할에 필요한 항목이 비어 있습니다."),
+  TEAM_NUMBER_MANAGED_BY_PROJECT(HttpStatus.BAD_REQUEST, "프로젝트에 소속된 참가자의 팀 번호는 프로젝트 수정에서 변경해 주세요."),
 
   // Booth
   BOOTH_NOT_FOUND(HttpStatus.NOT_FOUND, "부스를 찾을 수 없습니다."),
