@@ -1,0 +1,59 @@
+name: ganzithon-prod
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
+
+services:
+  # Nginx Reverse Proxy (blue/green 전환 담당)
+  nginx:
+    image: nginx:1.28-alpine
+    container_name: ganzithon-prod-nginx
+    restart: unless-stopped
+
+    # Docker 로그 관리
+    logging: *default-logging
+
+    # HTTP / HTTPS
+    ports:
+      - "80:80"
+      - "443:443"
+
+    # Nginx 설정 및 SSL 인증서
+    volumes:
+      # Nginx 설정 (upstream-app.conf는 server 블록 안에서 include됨)
+      - ../../nginx/prod/default.conf:/etc/nginx/conf.d/default.conf:ro
+      # upstream 파일은 repo 밖에 둔다 — repo 안 파일은 actions/checkout이
+      # 매 배포마다 리셋해서 blue/green 상태가 유실된다.
+      # deploy.sh가 최초 실행 시 deploy/nginx/prod/upstream-app.conf를 seed한다.
+      - ${HOME}/.ganzithon-prod/upstream-app.conf:/etc/nginx/conf.d/upstream-app.conf:ro
+      # Let's Encrypt SSL 인증서
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      # Certbot 인증 경로
+      - /var/www/certbot:/var/www/certbot:ro
+
+    # Docker 내부 네트워크 (app-blue/green과 공유)
+    networks:
+      - ganzithon-prod-net
+
+    # Nginx Health Check
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -q -O /dev/null http://127.0.0.1/health || exit 1"
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+# blue/green 앱 컨테이너와 공유하는 외부 네트워크
+# 최초 1회 생성 필요: docker network create ganzithon-prod-net
+# (deploy.sh가 없으면 자동 생성함)
+networks:
+  ganzithon-prod-net:
+    name: ganzithon-prod-net
+    external: true

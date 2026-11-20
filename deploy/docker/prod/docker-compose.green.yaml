@@ -1,0 +1,63 @@
+name: ganzithon-prod-green
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
+
+services:
+  app:
+    build:
+      context: ../../..
+      dockerfile: Dockerfile
+    image: ganzithon-server:prod
+    container_name: ganzithon-prod-app-green
+    restart: unless-stopped
+
+    # Docker 로그 관리
+    logging: *default-logging
+
+    # nginx 컨테이너는 공유 네트워크상의 컨테이너명으로 접근하고,
+    # 호스트 포트는 deploy/monitor 스크립트의 헬스체크 전용이다.
+    ports:
+      - "127.0.0.1:8082:8080"
+
+    # 환경 변수 (배포 스크립트가 export한 값을 주입)
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SERVER_PORT: 8080
+      TZ: Asia/Seoul
+      # NCP MySQL
+      PROD_DB_URL: ${PROD_DB_URL:?PROD_DB_URL is required}
+      PROD_DB_USER: ${PROD_DB_USER:?PROD_DB_USER is required}
+      PROD_DB_PASSWORD: ${PROD_DB_PASSWORD:?PROD_DB_PASSWORD is required}
+      # NCP Object Storage
+      NCP_BUCKET: ${NCP_BUCKET:?NCP_BUCKET is required}
+      NCP_ACCESS_KEY: ${NCP_ACCESS_KEY:?NCP_ACCESS_KEY is required}
+      NCP_SECRET_KEY: ${NCP_SECRET_KEY:?NCP_SECRET_KEY is required}
+      # JWT
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+
+    # Docker 내부 네트워크 (nginx와 공유)
+    networks:
+      - ganzithon-prod-net
+
+    # Spring Boot Health Check
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -q -O /dev/null http://127.0.0.1:8080/actuator/health || curl -fsS -o /dev/null http://127.0.0.1:8080/actuator/health || exit 1"
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+
+# nginx와 공유하는 외부 네트워크
+# docker compose down 시에도 삭제되지 않도록 external로 선언한다.
+networks:
+  ganzithon-prod-net:
+    name: ganzithon-prod-net
+    external: true
