@@ -159,4 +159,8 @@ public class User extends BaseEntity {
     public void enterLuckyDraw() {
         this.luckyDrawEntered = true;
     }
+
+    public void complete() {
+        this.completed = true;
+    }
 }
