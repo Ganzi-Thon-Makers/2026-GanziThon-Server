@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class StampFacade {
 
   private static final int LUCKY_DRAW_THRESHOLD = 15;
+  private static final int COMPLETION_THRESHOLD = 9;
 
   private final StampService stampService;
   private final QrTokenService qrTokenService;
@@ -91,6 +92,10 @@ public class StampFacade {
     if (collectedCount >= LUCKY_DRAW_THRESHOLD && !user.isLuckyDrawEntered()) {
       user.enterLuckyDraw();
       justEntered = true;
+    }
+    // 스탬프 9개 도달 시 수료 처리 (이미 수료면 재처리하지 않음)
+    if (collectedCount >= COMPLETION_THRESHOLD && !user.isCompleted()) {
+      user.complete();
     }
 
     return new StampCollectResponse(
