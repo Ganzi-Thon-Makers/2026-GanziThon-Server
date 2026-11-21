@@ -30,7 +30,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class StampFacade {
 
   private static final int LUCKY_DRAW_THRESHOLD = 15;
-  private static final int COMPLETION_THRESHOLD = 9;
 
   private final StampService stampService;
   private final QrTokenService qrTokenService;
@@ -93,8 +92,10 @@ public class StampFacade {
       user.enterLuckyDraw();
       justEntered = true;
     }
-    // 스탬프 9개 도달 시 수료 처리 (이미 수료면 재처리하지 않음)
-    if (collectedCount >= COMPLETION_THRESHOLD && !user.isCompleted()) {
+    // 모든 구역에서 기준 개수 이상 모으면 수료 처리 (이미 수료면 재처리하지 않음)
+    int requiredPerZone = stampProperties.zoneCompletionThreshold();
+    if (!user.isCompleted() && collectedCount >= requiredPerZone * Zone.values().length
+        && allZonesCompleted(userId, requiredPerZone)) {
       user.complete();
     }
 
@@ -180,5 +181,16 @@ public class StampFacade {
 
   private int remainingToLuckyDraw(long collectedCount) {
     return (int) Math.max(0, LUCKY_DRAW_THRESHOLD - collectedCount);
+  }
+
+  // 수료 = 모든 구역에서 기준 개수(zone-completion-threshold) 이상 적립
+  private boolean allZonesCompleted(Long userId, int requiredPerZone) {
+    List<Long> boothIds = stampService.findAllByUserId(userId).stream()
+        .map(Stamp::getBoothId)
+        .toList();
+    Map<Zone, Long> countByZone = boothService.findAllByIds(boothIds).stream()
+        .collect(Collectors.groupingBy(Booth::getZone, Collectors.counting()));
+    return Arrays.stream(Zone.values())
+        .allMatch(zone -> countByZone.getOrDefault(zone, 0L) >= requiredPerZone);
   }
 }
